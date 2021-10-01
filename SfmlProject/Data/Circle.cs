@@ -1,30 +1,33 @@
 ﻿namespace SFMLTest.Data {
-    public class Circle : IIntersect {
+    public class Circle : ICollidesWith {
         public Point Center { get; set; }
-        public double Radius { get; set; }
+        public float Radius { get; set; }
 
-        public Circle(Point point, double radius) {
+        public Circle(Point point, float radius) {
             this.Center = point;
             this.Radius = radius;
         }
 
-        public bool Intersects(Point otherPoint) {
+        public Circle(float x, float y, float radius) : this(new Point(x, y), radius) {
+        }
+
+        public bool Collides(Point otherPoint) {
             throw new System.NotImplementedException();
         }
 
-        public bool Intersects(Line otherLine) {
+        public bool Collides(Line otherLine) {
             throw new System.NotImplementedException();
         }
 
-        public bool Intersects(Triangle otherTriangle) {
+        public bool Collides(Triangle otherTriangle) {
             throw new System.NotImplementedException();
         }
 
-        public bool Intersects(Circle otherCircle) {
+        public bool Collides(Circle otherCircle) {
             throw new System.NotImplementedException();
         }
 
-        public bool Intersects(Shape otherShape) {
+        public bool Collides(Shape otherShape) {
             throw new System.NotImplementedException();
         }
 

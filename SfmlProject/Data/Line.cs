@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace SFMLTest.Data {
-    public class Line : IIntersect {
+    public class Line : ICollidesWith {
 
         public Point PointA { get; set; }
         public Point PointB { get; set; }
@@ -15,13 +15,11 @@ namespace SFMLTest.Data {
             this.yIntercept = this.PointA.Y - (this.slope * this.PointA.X);
         }
 
-        public Line(float aX, float aY, float bX, float bY) : this(new Point(aX, aY), new Point(bX, bY)) { }
-
-        public bool Intersects(Point otherPoint) {
+        public bool Collides(Point otherPoint) {
             return GeometryUtils.PointOnLine(otherPoint, this);
         }
 
-        public bool Intersects(Line other) {
+        public bool Collides(Line other) {
             // maybe there's no need to calculate anything
             bool overlapInX = Math.Max(this.PointA.X, this.PointB.X) >= Math.Min(other.PointA.X, other.PointB.X) && Math.Min(this.PointA.X, this.PointB.X) <= Math.Max(other.PointA.X, other.PointB.X);
             bool overlapInY = Math.Max(this.PointA.Y, this.PointB.Y) >= Math.Min(other.PointA.Y, other.PointB.Y) && Math.Min(this.PointA.Y, this.PointB.Y) <= Math.Max(other.PointA.Y, other.PointB.Y);
@@ -37,22 +35,16 @@ namespace SFMLTest.Data {
             }
         }
 
-        public bool Intersects(Triangle otherTriangle) {
+        public bool Collides(Triangle otherTriangle) {
             return GeometryUtils.LineIntersectsTriangle(this, otherTriangle);
         }
 
-        public bool Intersects(Circle otherCircle) {
-            // FIXME: check Google for implementation
-            throw new NotImplementedException();
+        public bool Collides(Circle otherCircle) {
+            return GeometryUtils.LineIntersectsCircle(this, otherCircle);
         }
 
-        public bool Intersects(Shape otherShape) {
-            foreach (Line otherLine in otherShape.Lines) {
-                if (this.Intersects(otherLine)) {
-                    return true;
-                }
-            }
-            // FIXME: need triangles from shape
+        public bool Collides(Shape otherShape) {
+            return GeometryUtils.LineIntersectsShape(this, otherShape);
         }
 
         public override string ToString() {

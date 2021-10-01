@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace SFMLTest.Data {
-    public class Triangle : IIntersect {
+    public class Triangle : ICollidesWith {
         public Point PointA { get; set; }
         public Point PointB { get; set; }
         public Point PointC { get; set; }
@@ -17,23 +17,23 @@ namespace SFMLTest.Data {
             this.Lines.Add(new Line(c, a));
         }
 
-        public bool Intersects(Point otherPoint) {
+        public bool Collides(Point otherPoint) {
             return GeometryUtils.PointInTriangle(otherPoint, this);
         }
 
-        public bool Intersects(Line otherLine) {
+        public bool Collides(Line otherLine) {
             return GeometryUtils.LineIntersectsTriangle(otherLine, this);
         }
 
-        public bool Intersects(Triangle otherTriangle) {
+        public bool Collides(Triangle otherTriangle) {
             throw new System.NotImplementedException();
         }
 
-        public bool Intersects(Circle otherCircle) {
+        public bool Collides(Circle otherCircle) {
             throw new System.NotImplementedException();
         }
 
-        public bool Intersects(Shape otherShape) {
+        public bool Collides(Shape otherShape) {
             throw new System.NotImplementedException();
         }
 

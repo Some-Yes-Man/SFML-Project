@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 
 namespace SFMLTest.Data {
-    public class Point : IIntersect {
+    public class Point : ICollidesWith {
         private Vector2 vector = new Vector2();
         public float X {
             get { return this.vector.X; }
@@ -11,30 +11,32 @@ namespace SFMLTest.Data {
             get { return this.vector.Y; }
             set { this.vector.Y = value; }
         }
+        public Vector2 Vector {
+            get { return this.vector; }
+        }
 
         public Point(float x, float y) {
             this.vector = new Vector2(x, y);
         }
 
-        public bool Intersects(Point otherPoint) {
-            return (this.X == otherPoint.X) && (this.Y == otherPoint.Y);
+        public bool Collides(Point otherPoint) {
+            return this.vector.Equals(otherPoint.vector);
         }
 
-        public bool Intersects(Line otherLine) {
+        public bool Collides(Line otherLine) {
             return GeometryUtils.PointOnLine(this, otherLine);
         }
 
-        public bool Intersects(Triangle otherTriangle) {
+        public bool Collides(Triangle otherTriangle) {
             return GeometryUtils.PointInTriangle(this, otherTriangle);
         }
 
-        public bool Intersects(Circle otherCircle) {
+        public bool Collides(Circle otherCircle) {
             return GeometryUtils.PointInCircle(this, otherCircle);
         }
 
-        public bool Intersects(Shape otherShape) {
-            // FIXME: split into triangles and check
-            throw new System.NotImplementedException();
+        public bool Collides(Shape otherShape) {
+            return GeometryUtils.PointInShape(this, otherShape);
         }
 
         public override string ToString() {
