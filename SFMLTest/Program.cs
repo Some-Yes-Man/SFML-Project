@@ -85,6 +85,7 @@ namespace SFMLTest {
             Sprite sprite = new Sprite(texture);
             sprite.Color = Color.Yellow;
             sprite.Scale = new Vector2f(0.5f, 0.5f);
+            sprite.Position = new Vector2f(10, 10);
 
             // WOOD :D
             Texture woodTexture = new Texture("Resources/wood.jpg");
