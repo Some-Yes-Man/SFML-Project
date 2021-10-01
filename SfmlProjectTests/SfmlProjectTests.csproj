@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SFMLTest\SFMLTest.csproj" />
+    <ProjectReference Include="..\SFMLTest\SfmlProject.csproj" />
   </ItemGroup>
 
 </Project>
