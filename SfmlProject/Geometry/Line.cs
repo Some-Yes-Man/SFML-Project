@@ -2,37 +2,54 @@
 using System;
 
 namespace SfmlProject.Geometry {
-    public class Line : ICollidesWith {
+    public class Line : Shape, IBoundingBox, ICollidesWith {
 
-        public Point PointA { get; set; }
-        public Point PointB { get; set; }
-        public double slope { get; private set; }
-        public double yIntercept { get; private set; }
+        private static readonly double EPSILON = 0.00001;
 
-        public Line(Point pointA, Point pointB) {
-            this.PointA = pointA;
-            this.PointB = pointB;
-            this.slope = (this.PointB.Y - this.PointA.Y) / (this.PointB.X - this.PointA.X);
-            this.yIntercept = this.PointA.Y - this.slope * this.PointA.X;
+        private readonly Point pointA;
+        private readonly Point pointB;
+        private readonly double slope;
+        private readonly double yIntercept;
+
+        private Rectangle boundingBox;
+
+        public Line(Point pointA, Point pointB) : base() {
+            this.pointA = pointA;
+            this.pointB = pointB;
+            this.slope = (this.pointB.Y - this.pointA.Y) / (this.pointB.X - this.pointA.X);
+            this.yIntercept = this.pointA.Y - this.slope * this.pointA.X;
+
+            this.Points.Add(this.pointA);
+            this.Points.Add(this.pointB);
+            this.Lines.Add(this);
+        }
+
+        public Rectangle BoundingBox {
+            get {
+                if (this.boundingBox == null) {
+                    this.boundingBox = new Rectangle(pointA, pointB);
+                }
+                return this.boundingBox;
+            }
         }
 
         public bool Collides(Point otherPoint) {
-            return CollisionHelper.PointOnLine(otherPoint, this);
+            return otherPoint.X >= Math.Min(this.pointA.X, this.pointB.X) && otherPoint.X <= Math.Max(this.pointA.X, this.pointB.X) && Math.Abs(this.slope * otherPoint.X + this.yIntercept - otherPoint.Y) <= EPSILON;
         }
 
         public bool Collides(Line other) {
             // maybe there's no need to calculate anything
-            bool overlapInX = Math.Max(this.PointA.X, this.PointB.X) >= Math.Min(other.PointA.X, other.PointB.X) && Math.Min(this.PointA.X, this.PointB.X) <= Math.Max(other.PointA.X, other.PointB.X);
-            bool overlapInY = Math.Max(this.PointA.Y, this.PointB.Y) >= Math.Min(other.PointA.Y, other.PointB.Y) && Math.Min(this.PointA.Y, this.PointB.Y) <= Math.Max(other.PointA.Y, other.PointB.Y);
+            bool overlapInX = Math.Max(this.pointA.X, this.pointB.X) >= Math.Min(other.pointA.X, other.pointB.X) && Math.Min(this.pointA.X, this.pointB.X) <= Math.Max(other.pointA.X, other.pointB.X);
+            bool overlapInY = Math.Max(this.pointA.Y, this.pointB.Y) >= Math.Min(other.pointA.Y, other.pointB.Y) && Math.Min(this.pointA.Y, this.pointB.Y) <= Math.Max(other.pointA.Y, other.pointB.Y);
             if (!overlapInX || !overlapInY) {
                 return false;
             }
             else {
-                double otherAvirtualY = double.IsInfinity(this.slope) ? other.PointA.Y : other.PointA.X * this.slope + this.yIntercept;
-                double otherBvirtualY = double.IsInfinity(this.slope) ? other.PointB.Y : other.PointB.X * this.slope + this.yIntercept;
-                double thisAvirtualY = double.IsInfinity(other.slope) ? this.PointA.Y : this.PointA.X * other.slope + other.yIntercept;
-                double thisBvirtualY = double.IsInfinity(other.slope) ? this.PointB.Y : this.PointB.X * other.slope + other.yIntercept;
-                return (other.PointA.Y - otherAvirtualY) * (other.PointB.Y - otherBvirtualY) <= 0 && (this.PointA.Y - thisAvirtualY) * (this.PointB.Y - thisBvirtualY) <= 0;
+                double otherAvirtualY = double.IsInfinity(this.slope) ? other.pointA.Y : other.pointA.X * this.slope + this.yIntercept;
+                double otherBvirtualY = double.IsInfinity(this.slope) ? other.pointB.Y : other.pointB.X * this.slope + this.yIntercept;
+                double thisAvirtualY = double.IsInfinity(other.slope) ? this.pointA.Y : this.pointA.X * other.slope + other.yIntercept;
+                double thisBvirtualY = double.IsInfinity(other.slope) ? this.pointB.Y : this.pointB.X * other.slope + other.yIntercept;
+                return (other.pointA.Y - otherAvirtualY) * (other.pointB.Y - otherBvirtualY) <= 0 && (this.pointA.Y - thisAvirtualY) * (this.pointB.Y - thisBvirtualY) <= 0;
             }
         }
 
@@ -41,7 +58,7 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Rectangle otherRectangle) {
-            throw new NotImplementedException();
+            return CollisionHelper.LineIntersectsRectangle(this, otherRectangle);
         }
 
         public bool Collides(Circle otherCircle) {
@@ -49,11 +66,7 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Polygon otherPolygon) {
-            return CollisionHelper.LineIntersectsShape(this, otherPolygon);
-        }
-
-        public override string ToString() {
-            return string.Format("L[{0},{1}]", this.PointA, this.PointB);
+            return CollisionHelper.LineIntersectsPolygon(this, otherPolygon);
         }
     }
 }

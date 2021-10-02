@@ -5,17 +5,17 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace SfmlProject.Data.Tests {
+namespace SfmlProjectTests.Geometry {
     [TestClass()]
     public class LineTests {
 
         [TestMethod()]
         public void LineTest() {
             Line line = new Line(new Point(1, 2), new Point(3, 4));
-            Assert.AreEqual(1, line.PointA.X);
-            Assert.AreEqual(2, line.PointA.Y);
-            Assert.AreEqual(3, line.PointB.X);
-            Assert.AreEqual(4, line.PointB.Y);
+            Assert.AreEqual(1, line.Points[0].X);
+            Assert.AreEqual(2, line.Points[0].Y);
+            Assert.AreEqual(3, line.Points[1].X);
+            Assert.AreEqual(4, line.Points[1].Y);
         }
 
         [TestMethod()]

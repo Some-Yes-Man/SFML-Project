@@ -1,13 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SfmlProject.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace SfmlProject.Data.Tests {
+namespace SfmlProject.Geometry.Tests {
     [TestClass()]
-    public class GeometryUtilsTests {
+    public class CollisionHelperTests {
         private class PointDataSource : Attribute, ITestDataSource {
             public IEnumerable<object[]> GetData(MethodInfo methodInfo) {
                 yield return new object[] { false, new Line(new Point(1, 1), new Point(2, 2)), new Point(4f, 4f), "Point far away." };
@@ -26,17 +25,12 @@ namespace SfmlProject.Data.Tests {
 
         [DataTestMethod]
         [PointDataSource]
-        public void IntersectsPointTest(bool result, Line line, Point point, string name) {
-            Assert.AreEqual(result, CollisionHelper.PointOnLine(point, line));
+        public void PointInTriangleTest(bool result, Line line, Point point, string name) {
+            Assert.AreEqual(result, line.Collides(point));
         }
 
         [TestMethod()]
-        public void PointInTriangleTest() {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void PointInTriangleTest1() {
+        public void PointInRectangleTest() {
             Assert.Fail();
         }
 
@@ -46,7 +40,52 @@ namespace SfmlProject.Data.Tests {
         }
 
         [TestMethod()]
+        public void PointInPolygonTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
         public void LineIntersectsTriangleTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void RectangleIntersectsRectangleTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void LineIntersectsRectangleTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void LineIntersectsCircleTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void LineIntersectsPolygonTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsRectangleTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsCircleTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void RectangleIntersectsCircleTest() {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void RectangleIntersectsPolygonTest() {
             Assert.Fail();
         }
     }

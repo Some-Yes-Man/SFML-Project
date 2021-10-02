@@ -1,8 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SfmlProject.Geometry;
-using System;
 
-namespace SfmlProject.Data.Tests {
+namespace SfmlProjectTests.Geometry {
     [TestClass()]
     public class PointTests {
         [TestMethod()]
@@ -41,6 +40,10 @@ namespace SfmlProject.Data.Tests {
         }
 
         [TestMethod()]
+        public void CollisionWithRectangleCalledCorrectly() {
+        }
+
+        [TestMethod()]
         public void CollisionWithCircleCalledCorrectly() {
             Point point = new Point(1.5f, 1.5f);
             Circle circle = new Circle(2, 2, 1);
@@ -48,10 +51,10 @@ namespace SfmlProject.Data.Tests {
         }
 
         [TestMethod()]
-        public void CollisionWithShapeCalledCorrectly() {
+        public void CollisionWithPolygonCalledCorrectly() {
             Point point = new Point(1.5f, 1.5f);
-            Polygon shape = new Polygon(new Point(1, 1), new Point(-1, 1), new Point(2, 4), new Point(2, -3));
-            Assert.IsTrue(point.Collides(shape));
+            Polygon polygon = new Polygon(new Point(1, 1), new Point(-1, 1), new Point(2, 4), new Point(2, -3));
+            Assert.IsTrue(point.Collides(polygon));
         }
     }
 }

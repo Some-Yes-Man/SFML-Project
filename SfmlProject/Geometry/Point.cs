@@ -3,7 +3,9 @@ using System.Numerics;
 
 namespace SfmlProject.Geometry {
     public class Point : ICollidesWith {
+
         private Vector2 vector = new Vector2();
+
         public float X {
             get { return this.vector.X; }
             set { this.vector.X = value; }
@@ -25,7 +27,7 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Line otherLine) {
-            return CollisionHelper.PointOnLine(this, otherLine);
+            return otherLine.Collides(this);
         }
 
         public bool Collides(Triangle otherTriangle) {
@@ -41,7 +43,7 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Polygon otherPolygon) {
-            return CollisionHelper.PointInShape(this, otherPolygon);
+            return CollisionHelper.PointInPolygon(this, otherPolygon);
         }
 
         public override string ToString() {

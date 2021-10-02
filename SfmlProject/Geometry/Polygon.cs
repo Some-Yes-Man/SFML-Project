@@ -5,9 +5,8 @@ using SfmlProject.Geometry.Base;
 using SfmlProject.Geometry.Utils;
 
 namespace SfmlProject.Geometry {
-    public class Polygon : ICollidesWith {
-        public List<Point> Points { get; private set; }
-        public List<Line> Lines { get; private set; }
+    public class Polygon : Shape, IBoundingBox, ICollidesWith {
+        private Rectangle boundingBox;
         public HashSet<Triangle> Triangles { get; private set; }
 
         public Polygon(params Point[] points) {
@@ -15,8 +14,7 @@ namespace SfmlProject.Geometry {
             if (points == null || points.Length < 3) {
                 throw new ArgumentException("Shapes can only be constructed from 3 or more points.");
             }
-            this.Points = new List<Point>(points);
-            this.Lines = new List<Line>();
+            this.Points.AddRange(points);
             for (int i = 0; i < points.Length; i++) {
                 this.Lines.Add(new Line(points[i], points[(i + 1) % points.Length]));
             }
@@ -30,11 +28,30 @@ namespace SfmlProject.Geometry {
             for (int i = 0; i < this.Lines.Count; i++) {
                 Line currentLine = this.Lines[i];
                 Line nextLine = this.Lines[(i + 1) % this.Lines.Count];
-                if (GeometryUtils.CrossProduct(currentLine.PointA.Vector - currentLine.PointB.Vector, nextLine.PointA.Vector - nextLine.PointB.Vector) == 0) {
+                if (GeometryUtils.CrossProduct(currentLine.Points[0].Vector - currentLine.Points[1].Vector, nextLine.Points[0].Vector - nextLine.Points[1].Vector) == 0) {
                     throw new ArgumentException("Shapes are not allowed to have co-linear points (points in a row).");
                 }
             }
             this.Triangles = this.Triangulate();
+        }
+
+        public Rectangle BoundingBox {
+            get {
+                if (this.boundingBox == null) {
+                    float minX = float.MaxValue;
+                    float minY = float.MaxValue;
+                    float maxX = float.MinValue;
+                    float maxY = float.MinValue;
+                    foreach (Point point in this.Points) {
+                        minX = Math.Min(minX, point.X);
+                        minY = Math.Min(minY, point.Y);
+                        maxX = Math.Max(maxX, point.X);
+                        maxY = Math.Max(maxY, point.Y);
+                    }
+                    this.boundingBox = new Rectangle(new Point(minX, minY), new Point(maxX, maxY));
+                }
+                return this.boundingBox;
+            }
         }
 
         private bool NeighboringLines(Line x, Line y) {
@@ -103,10 +120,6 @@ namespace SfmlProject.Geometry {
                 }
             }
             return false;
-        }
-
-        public override string ToString() {
-            return string.Format("S[{0}]", string.Join(',', this.Points));
         }
     }
 }

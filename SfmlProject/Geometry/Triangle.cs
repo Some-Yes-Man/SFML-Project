@@ -1,25 +1,27 @@
 ﻿using SfmlProject.Geometry.Base;
-using System.Collections.Generic;
+using System;
 
 namespace SfmlProject.Geometry {
-    public class Triangle : ICollidesWith {
-        private HashSet<Point> points = new HashSet<Point>();
-        public Point PointA { get; set; }
-        public Point PointB { get; set; }
-        public Point PointC { get; set; }
-        public HashSet<Line> Lines { get; private set; }
+    public class Triangle : Shape, IBoundingBox, ICollidesWith {
+        private Rectangle boundingBox;
 
-        public Triangle(Point a, Point b, Point c) {
-            this.PointA = a;
-            this.PointB = b;
-            this.PointC = c;
-            this.points.Add(a);
-            this.points.Add(b);
-            this.points.Add(c);
-            this.Lines = new HashSet<Line>();
-            this.Lines.Add(new Line(a, b));
-            this.Lines.Add(new Line(b, c));
-            this.Lines.Add(new Line(c, a));
+        public Triangle(Point pointA, Point pointB, Point pointC) : base() {
+            this.Points.Add(pointA);
+            this.Points.Add(pointB);
+            this.Points.Add(pointC);
+            this.Lines.Add(new Line(pointA, pointB));
+            this.Lines.Add(new Line(pointB, pointC));
+            this.Lines.Add(new Line(pointC, pointA));
+        }
+
+        public Rectangle BoundingBox {
+            get {
+                if (this.boundingBox == null) {
+                    this.boundingBox = new Rectangle(new Point(Math.Min(Math.Min(Points[0].X, Points[1].X), Points[2].X), Math.Min(Math.Min(Points[0].Y, Points[1].Y), Points[2].Y)),
+                        new Point(Math.Max(Math.Max(Points[0].X, Points[1].X), Points[2].X), Math.Max(Math.Max(Points[0].Y, Points[1].Y), Points[2].Y)));
+                }
+                return this.boundingBox;
+            }
         }
 
         public bool Collides(Point otherPoint) {
@@ -30,27 +32,28 @@ namespace SfmlProject.Geometry {
             return CollisionHelper.LineIntersectsTriangle(otherLine, this);
         }
 
+        // TODO : optimise?
         public bool Collides(Triangle otherTriangle) {
-            foreach (Point point in this.points) {
-                if (CollisionHelper.PointInTriangle(point, otherTriangle)) { }
+            foreach (Line line in this.Lines) {
+                foreach (Line otherLine in otherTriangle.Lines) {
+                    if (line.Collides(otherLine)) {
+                        return true;
+                    }
+                }
             }
-            throw new System.NotImplementedException();
+            return CollisionHelper.PointInTriangle(this.Points[0], otherTriangle);
         }
 
         public bool Collides(Rectangle otherRectangle) {
-            throw new System.NotImplementedException();
+            return CollisionHelper.TriangleIntersectsRectangle(this, otherRectangle);
         }
 
         public bool Collides(Circle otherCircle) {
-            throw new System.NotImplementedException();
+            return CollisionHelper.TriangleIntersectsCircle(this, otherCircle);
         }
 
         public bool Collides(Polygon otherPolygon) {
             throw new System.NotImplementedException();
-        }
-
-        public override string ToString() {
-            return string.Format("T[{0},{1},{2}]", this.PointA, this.PointB, this.PointC);
         }
     }
 }
