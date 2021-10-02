@@ -1,7 +1,7 @@
 ﻿using SFML.System;
 using System.Collections.Generic;
 
-namespace SFMLTest.Data {
+namespace SfmlProject.Data {
     public class LevelGeometry {
         public List<Vector2f> Coordinates { get; private set; }
 

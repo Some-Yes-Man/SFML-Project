@@ -4,11 +4,11 @@ using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
 using SFML.System;
-using SFMLTest.Data;
+using SfmlProject.Data;
 using Newtonsoft.Json;
 using System.IO;
 
-namespace SFMLTest {
+namespace SfmlProject {
     class Program {
         private static readonly Logger LOGGER = LogManager.GetLogger("SFMLTest");
 

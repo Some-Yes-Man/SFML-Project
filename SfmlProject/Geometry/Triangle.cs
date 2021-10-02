@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using SfmlProject.Geometry.Base;
+using System.Collections.Generic;
 
-namespace SFMLTest.Data {
+namespace SfmlProject.Geometry {
     public class Triangle : ICollidesWith {
+        private HashSet<Point> points = new HashSet<Point>();
         public Point PointA { get; set; }
         public Point PointB { get; set; }
         public Point PointC { get; set; }
@@ -11,6 +13,9 @@ namespace SFMLTest.Data {
             this.PointA = a;
             this.PointB = b;
             this.PointC = c;
+            this.points.Add(a);
+            this.points.Add(b);
+            this.points.Add(c);
             this.Lines = new HashSet<Line>();
             this.Lines.Add(new Line(a, b));
             this.Lines.Add(new Line(b, c));
@@ -18,14 +23,21 @@ namespace SFMLTest.Data {
         }
 
         public bool Collides(Point otherPoint) {
-            return GeometryUtils.PointInTriangle(otherPoint, this);
+            return CollisionHelper.PointInTriangle(otherPoint, this);
         }
 
         public bool Collides(Line otherLine) {
-            return GeometryUtils.LineIntersectsTriangle(otherLine, this);
+            return CollisionHelper.LineIntersectsTriangle(otherLine, this);
         }
 
         public bool Collides(Triangle otherTriangle) {
+            foreach (Point point in this.points) {
+                if (CollisionHelper.PointInTriangle(point, otherTriangle)) { }
+            }
+            throw new System.NotImplementedException();
+        }
+
+        public bool Collides(Rectangle otherRectangle) {
             throw new System.NotImplementedException();
         }
 
@@ -33,7 +45,7 @@ namespace SFMLTest.Data {
             throw new System.NotImplementedException();
         }
 
-        public bool Collides(Shape otherShape) {
+        public bool Collides(Polygon otherPolygon) {
             throw new System.NotImplementedException();
         }
 

@@ -1,7 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SfmlProject.Geometry;
 using System;
 
-namespace SFMLTest.Data.Tests {
+namespace SfmlProject.Data.Tests {
     [TestClass()]
     public class PointTests {
         [TestMethod()]
@@ -49,7 +50,7 @@ namespace SFMLTest.Data.Tests {
         [TestMethod()]
         public void CollisionWithShapeCalledCorrectly() {
             Point point = new Point(1.5f, 1.5f);
-            Shape shape = new Shape(new Point(1, 1), new Point(-1, 1), new Point(2, 4), new Point(2, -3));
+            Polygon shape = new Polygon(new Point(1, 1), new Point(-1, 1), new Point(2, 4), new Point(2, -3));
             Assert.IsTrue(point.Collides(shape));
         }
     }

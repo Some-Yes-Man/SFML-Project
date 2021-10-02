@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SfmlProject.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace SFMLTest.Data.Tests {
+namespace SfmlProject.Data.Tests {
     [TestClass()]
     public class LineTests {
 
@@ -32,10 +33,11 @@ namespace SFMLTest.Data.Tests {
                 yield return new object[] { false, new Line(new Point(1, 1), new Point(4, 4)), new Line(new Point(2, 3), new Point(0, 4)), "Two lines away from each other but 'overlapping' in one dimension." };
                 yield return new object[] { false, new Line(new Point(1, 1), new Point(4, 1)), new Line(new Point(1, 2), new Point(5, 2)), "Two horizontal, parallel lines." };
                 yield return new object[] { false, new Line(new Point(1, 1), new Point(1, 4)), new Line(new Point(2, 1), new Point(2, 5)), "Two vertical, parallel lines." };
-                yield return new object[] { false, new Line(new Point(1, 1), new Point(1, 4)), new Line(new Point(2, 1), new Point(2, 5)), "Two vertical, parallel lines." };
+                yield return new object[] { false, new Line(new Point(-5, -3), new Point(-1, -4)), new Line(new Point(-4, -5), new Point(-2, -4)), "Two lines next to each other but not touching." };
                 yield return new object[] { true, new Line(new Point(1, 1), new Point(2, 2)), new Line(new Point(1, 2), new Point(2, 1)), "Two lines meeting in the middle." };
                 yield return new object[] { true, new Line(new Point(1, 1), new Point(2, 2)), new Line(new Point(3, 3), new Point(2, 2)), "Two lines touching at the end." };
-                yield return new object[] { false, new Line(new Point(-5, -3), new Point(-1, -4)), new Line(new Point(-4, -5), new Point(-2, -4)), "Two lines next to each other but not touching." };
+                yield return new object[] { true, new Line(new Point(1, 1), new Point(3, 3)), new Line(new Point(1.9f, 2.1f), new Point(3, 1)), "Two lines at an 45 angle, barely intersecting." };
+                yield return new object[] { true, new Line(new Point(0, 2), new Point(2, 2)), new Line(new Point(1, 1), new Point(1, 3)), "One horizontal, one vertical line intersecting." };
             }
 
             public string GetDisplayName(MethodInfo methodInfo, object[] data) {
@@ -67,7 +69,7 @@ namespace SFMLTest.Data.Tests {
         [TestMethod()]
         public void CollisionWithShapeCalledCorrectly() {
             Line line = new Line(new Point(1, 1), new Point(2, 2));
-            Shape shape = new Shape(new Point(1, 1), new Point(-1, 1), new Point(2, 4), new Point(2, -3));
+            Polygon shape = new Polygon(new Point(1, 1), new Point(-1, 1), new Point(2, 4), new Point(2, -3));
             Assert.IsTrue(line.Collides(shape));
         }
     }

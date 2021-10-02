@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Numerics;
+using SfmlProject.Geometry.Base;
+using SfmlProject.Geometry.Utils;
 
-namespace SFMLTest.Data {
-    public class Shape : ICollidesWith {
+namespace SfmlProject.Geometry {
+    public class Polygon : ICollidesWith {
         public List<Point> Points { get; private set; }
         public List<Line> Lines { get; private set; }
         public HashSet<Triangle> Triangles { get; private set; }
 
-        public Shape(params Point[] points) {
+        public Polygon(params Point[] points) {
             // not enough points given
-            if ((points == null) || (points.Length < 3)) {
+            if (points == null || points.Length < 3) {
                 throw new ArgumentException("Shapes can only be constructed from 3 or more points.");
             }
             this.Points = new List<Point>(points);
@@ -38,7 +39,7 @@ namespace SFMLTest.Data {
 
         private bool NeighboringLines(Line x, Line y) {
             int indexDifference = Math.Abs(this.Lines.IndexOf(x) - this.Lines.IndexOf(y));
-            return (indexDifference == 1) || (indexDifference == (this.Lines.Count - 1));
+            return indexDifference == 1 || indexDifference == this.Lines.Count - 1;
         }
 
         private HashSet<Triangle> Triangulate() {
@@ -47,14 +48,14 @@ namespace SFMLTest.Data {
             Point currentPoint = pointsLeft[0];
             while (pointsLeft.Count > 3) {
                 int currentIndex = pointsLeft.IndexOf(currentPoint);
-                Point previousPoint = (currentIndex == 0) ? pointsLeft[^1] : pointsLeft[currentIndex - 1];
-                Point nextPoint = (currentIndex == pointsLeft.Count - 1) ? pointsLeft[0] : pointsLeft[currentIndex + 1];
+                Point previousPoint = currentIndex == 0 ? pointsLeft[^1] : pointsLeft[currentIndex - 1];
+                Point nextPoint = currentIndex == pointsLeft.Count - 1 ? pointsLeft[0] : pointsLeft[currentIndex + 1];
                 // angles smaller 180
                 if (GeometryUtils.CrossProduct(previousPoint.Vector - currentPoint.Vector, currentPoint.Vector - nextPoint.Vector) < 0) {
                     Triangle possibleTriangle = new Triangle(previousPoint, currentPoint, nextPoint);
                     bool validTriangle = true;
                     foreach (Point point in pointsLeft.Where(x => !x.Equals(currentPoint) && !x.Equals(previousPoint) && !x.Equals(nextPoint))) {
-                        if (GeometryUtils.PointInTriangle(point, possibleTriangle)) {
+                        if (CollisionHelper.PointInTriangle(point, possibleTriangle)) {
                             validTriangle = false;
                             break;
                         }
@@ -87,12 +88,16 @@ namespace SFMLTest.Data {
             throw new NotImplementedException();
         }
 
+        public bool Collides(Rectangle otherRectangle) {
+            throw new NotImplementedException();
+        }
+
         public bool Collides(Circle otherCircle) {
             throw new NotImplementedException();
         }
 
-        public bool Collides(Shape otherShape) {
-            foreach (Line otherLine in otherShape.Lines) {
+        public bool Collides(Polygon otherPolygon) {
+            foreach (Line otherLine in otherPolygon.Lines) {
                 if (this.Collides(otherLine)) {
                     return true;
                 }

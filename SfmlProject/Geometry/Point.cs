@@ -1,6 +1,7 @@
-﻿using System.Numerics;
+﻿using SfmlProject.Geometry.Base;
+using System.Numerics;
 
-namespace SFMLTest.Data {
+namespace SfmlProject.Geometry {
     public class Point : ICollidesWith {
         private Vector2 vector = new Vector2();
         public float X {
@@ -24,19 +25,23 @@ namespace SFMLTest.Data {
         }
 
         public bool Collides(Line otherLine) {
-            return GeometryUtils.PointOnLine(this, otherLine);
+            return CollisionHelper.PointOnLine(this, otherLine);
         }
 
         public bool Collides(Triangle otherTriangle) {
-            return GeometryUtils.PointInTriangle(this, otherTriangle);
+            return CollisionHelper.PointInTriangle(this, otherTriangle);
+        }
+
+        public bool Collides(Rectangle otherRectangle) {
+            return CollisionHelper.PointInRectangle(this, otherRectangle);
         }
 
         public bool Collides(Circle otherCircle) {
-            return GeometryUtils.PointInCircle(this, otherCircle);
+            return CollisionHelper.PointInCircle(this, otherCircle);
         }
 
-        public bool Collides(Shape otherShape) {
-            return GeometryUtils.PointInShape(this, otherShape);
+        public bool Collides(Polygon otherPolygon) {
+            return CollisionHelper.PointInShape(this, otherPolygon);
         }
 
         public override string ToString() {

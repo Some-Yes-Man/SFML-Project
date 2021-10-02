@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SfmlProject.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace SFMLTest.Data.Tests {
+namespace SfmlProject.Data.Tests {
     [TestClass()]
     public class GeometryUtilsTests {
         private class PointDataSource : Attribute, ITestDataSource {
@@ -26,7 +27,7 @@ namespace SFMLTest.Data.Tests {
         [DataTestMethod]
         [PointDataSource]
         public void IntersectsPointTest(bool result, Line line, Point point, string name) {
-            Assert.AreEqual(result, GeometryUtils.PointOnLine(point, line));
+            Assert.AreEqual(result, CollisionHelper.PointOnLine(point, line));
         }
 
         [TestMethod()]

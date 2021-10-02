@@ -1,4 +1,6 @@
-﻿namespace SFMLTest.Data {
+﻿using SfmlProject.Geometry.Base;
+
+namespace SfmlProject.Geometry {
     public class Circle : ICollidesWith {
         public Point Center { get; set; }
         public float Radius { get; set; }
@@ -23,11 +25,15 @@
             throw new System.NotImplementedException();
         }
 
+        public bool Collides(Rectangle otherRectangle) {
+            throw new System.NotImplementedException();
+        }
+
         public bool Collides(Circle otherCircle) {
             throw new System.NotImplementedException();
         }
 
-        public bool Collides(Shape otherShape) {
+        public bool Collides(Polygon otherShape) {
             throw new System.NotImplementedException();
         }
 

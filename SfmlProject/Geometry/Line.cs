@@ -1,6 +1,7 @@
-﻿using System;
+﻿using SfmlProject.Geometry.Base;
+using System;
 
-namespace SFMLTest.Data {
+namespace SfmlProject.Geometry {
     public class Line : ICollidesWith {
 
         public Point PointA { get; set; }
@@ -12,11 +13,11 @@ namespace SFMLTest.Data {
             this.PointA = pointA;
             this.PointB = pointB;
             this.slope = (this.PointB.Y - this.PointA.Y) / (this.PointB.X - this.PointA.X);
-            this.yIntercept = this.PointA.Y - (this.slope * this.PointA.X);
+            this.yIntercept = this.PointA.Y - this.slope * this.PointA.X;
         }
 
         public bool Collides(Point otherPoint) {
-            return GeometryUtils.PointOnLine(otherPoint, this);
+            return CollisionHelper.PointOnLine(otherPoint, this);
         }
 
         public bool Collides(Line other) {
@@ -27,24 +28,28 @@ namespace SFMLTest.Data {
                 return false;
             }
             else {
-                double otherAvirtualY = (other.PointA.X * this.slope) + this.yIntercept;
-                double otherBvirtualY = (other.PointB.X * this.slope) + this.yIntercept;
-                double thisAvirtualY = (this.PointA.X * other.slope) + other.yIntercept;
-                double thisBvirtualY = (this.PointB.X * other.slope) + other.yIntercept;
-                return ((other.PointA.Y - otherAvirtualY) * (other.PointB.Y - otherBvirtualY) <= 0) && ((this.PointA.Y - thisAvirtualY) * (this.PointB.Y - thisBvirtualY) <= 0);
+                double otherAvirtualY = double.IsInfinity(this.slope) ? other.PointA.Y : other.PointA.X * this.slope + this.yIntercept;
+                double otherBvirtualY = double.IsInfinity(this.slope) ? other.PointB.Y : other.PointB.X * this.slope + this.yIntercept;
+                double thisAvirtualY = double.IsInfinity(other.slope) ? this.PointA.Y : this.PointA.X * other.slope + other.yIntercept;
+                double thisBvirtualY = double.IsInfinity(other.slope) ? this.PointB.Y : this.PointB.X * other.slope + other.yIntercept;
+                return (other.PointA.Y - otherAvirtualY) * (other.PointB.Y - otherBvirtualY) <= 0 && (this.PointA.Y - thisAvirtualY) * (this.PointB.Y - thisBvirtualY) <= 0;
             }
         }
 
         public bool Collides(Triangle otherTriangle) {
-            return GeometryUtils.LineIntersectsTriangle(this, otherTriangle);
+            return CollisionHelper.LineIntersectsTriangle(this, otherTriangle);
+        }
+
+        public bool Collides(Rectangle otherRectangle) {
+            throw new NotImplementedException();
         }
 
         public bool Collides(Circle otherCircle) {
-            return GeometryUtils.LineIntersectsCircle(this, otherCircle);
+            return CollisionHelper.LineIntersectsCircle(this, otherCircle);
         }
 
-        public bool Collides(Shape otherShape) {
-            return GeometryUtils.LineIntersectsShape(this, otherShape);
+        public bool Collides(Polygon otherPolygon) {
+            return CollisionHelper.LineIntersectsShape(this, otherPolygon);
         }
 
         public override string ToString() {
