@@ -5,13 +5,9 @@ namespace SfmlProject.Geometry {
     public class CollisionHelper {
 
         public static bool PointInTriangle(Point point, Triangle triangle) {
-            // magic method from 'the internet'
+            // magic method from 'the internet'; fixed and commented; https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
             double s = triangle.Points[0].Y * triangle.Points[2].X - triangle.Points[0].X * triangle.Points[2].Y + (triangle.Points[2].Y - triangle.Points[0].Y) * point.X + (triangle.Points[0].X - triangle.Points[2].X) * point.Y;
             double t = triangle.Points[0].X * triangle.Points[1].Y - triangle.Points[0].Y * triangle.Points[1].X + (triangle.Points[0].Y - triangle.Points[1].Y) * point.X + (triangle.Points[1].X - triangle.Points[0].X) * point.Y;
-
-            if (s < 0 != t < 0) {
-                return false;
-            }
 
             double A = -triangle.Points[1].Y * triangle.Points[2].X + triangle.Points[0].Y * (triangle.Points[2].X - triangle.Points[1].X) + triangle.Points[0].X * (triangle.Points[1].Y - triangle.Points[2].Y) + triangle.Points[1].X * triangle.Points[2].Y;
 
@@ -58,21 +54,10 @@ namespace SfmlProject.Geometry {
             return PointInTriangle(linePoint1, triangle);
         }
 
-        public static bool RectangleIntersectsRectangle(Rectangle rectangle, Rectangle otherRectangle) {
-            foreach (Point point in rectangle.Points) {
-                if (PointInRectangle(point, otherRectangle)) {
-                    return true;
-                }
-            }
-            foreach (Point point in otherRectangle.Points) {
-                if (PointInRectangle(point, rectangle)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public static bool LineIntersectsRectangle(Line line, Rectangle rectangle) {
+            if (line.Points[0].Collides(rectangle) || line.Points[1].Collides(rectangle)) {
+                return true;
+            }
             foreach (Line otherLine in rectangle.Lines) {
                 if (line.Collides(otherLine)) {
                     return true;
@@ -82,6 +67,9 @@ namespace SfmlProject.Geometry {
         }
 
         public static bool LineIntersectsCircle(Line line, Circle circle) {
+            if (PointInCircle(line.Points[0], circle) || PointInCircle(line.Points[1], circle)) {
+                return true;
+            }
             Vector2 lineVector = line.Points[0].Vector - line.Points[1].Vector;
             Vector2 perpVectorClock = new Vector2(lineVector.Y, -lineVector.X);
             perpVectorClock = Vector2.Normalize(perpVectorClock) * circle.Radius;
@@ -129,6 +117,20 @@ namespace SfmlProject.Geometry {
             }
             foreach (Line line in triangle.Lines) {
                 if (line.Collides(otherCircle)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool RectangleIntersectsRectangle(Rectangle rectangle, Rectangle otherRectangle) {
+            foreach (Point point in rectangle.Points) {
+                if (PointInRectangle(point, otherRectangle)) {
+                    return true;
+                }
+            }
+            foreach (Point point in otherRectangle.Points) {
+                if (PointInRectangle(point, rectangle)) {
                     return true;
                 }
             }
