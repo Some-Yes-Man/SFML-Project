@@ -4,16 +4,6 @@ using System.Numerics;
 namespace SfmlProject.Geometry {
     public class CollisionHelper {
 
-        public static bool PointInTriangle(Point point, Triangle triangle) {
-            // magic method from 'the internet'; fixed and commented; https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
-            double s = triangle.Points[0].Y * triangle.Points[2].X - triangle.Points[0].X * triangle.Points[2].Y + (triangle.Points[2].Y - triangle.Points[0].Y) * point.X + (triangle.Points[0].X - triangle.Points[2].X) * point.Y;
-            double t = triangle.Points[0].X * triangle.Points[1].Y - triangle.Points[0].Y * triangle.Points[1].X + (triangle.Points[0].Y - triangle.Points[1].Y) * point.X + (triangle.Points[1].X - triangle.Points[0].X) * point.Y;
-
-            double A = -triangle.Points[1].Y * triangle.Points[2].X + triangle.Points[0].Y * (triangle.Points[2].X - triangle.Points[1].X) + triangle.Points[0].X * (triangle.Points[1].Y - triangle.Points[2].Y) + triangle.Points[1].X * triangle.Points[2].Y;
-
-            return (A < 0) ? ((s <= 0) && ((s + t) >= A)) : ((s >= 0) && ((s + t) <= A));
-        }
-
         public static bool PointInRectangle(Point point, Rectangle rectangle) {
             return (rectangle.UpperLeft.X <= point.X) && (rectangle.LowerRight.X >= point.X) && (rectangle.UpperLeft.Y <= point.Y) && (rectangle.LowerRight.Y >= point.Y);
         }
@@ -24,9 +14,9 @@ namespace SfmlProject.Geometry {
             return x * x + y * y <= circle.Radius * circle.Radius;
         }
 
-        public static bool PointInPolygon(Point point, Polygon shape) {
-            foreach (Triangle subTriangle in shape.Triangles) {
-                if (PointInTriangle(point, subTriangle)) {
+        public static bool PointInPolygon(Point point, Polygon polygon) {
+            foreach (Triangle subTriangle in polygon.Triangles) {
+                if (subTriangle.Collides(point)) {
                     return true;
                 }
             }
@@ -51,7 +41,7 @@ namespace SfmlProject.Geometry {
                     return true;
                 }
             }
-            return PointInTriangle(linePoint1, triangle);
+            return triangle.Collides(linePoint1);
         }
 
         public static bool LineIntersectsRectangle(Line line, Rectangle rectangle) {
@@ -80,14 +70,16 @@ namespace SfmlProject.Geometry {
             return line.Collides(perpLineClock) || line.Collides(perpLineCounter);
         }
 
-        // FIXME: not tested
-        public static bool LineIntersectsPolygon(Line line, Polygon shape) {
-            foreach (Line shapeLine in shape.Lines) {
+        public static bool LineIntersectsPolygon(Line line, Polygon polygon) {
+            if (!line.BoundingBox.Collides(polygon.BoundingBox)) {
+                return false;
+            }
+            foreach (Line shapeLine in polygon.Lines) {
                 if (line.Collides(shapeLine)) {
                     return true;
                 }
             }
-            foreach (Triangle shapeTriangle in shape.Triangles) {
+            foreach (Triangle shapeTriangle in polygon.Triangles) {
                 if (line.Points[0].Collides(shapeTriangle)) {
                     return true;
                 }
@@ -95,8 +87,20 @@ namespace SfmlProject.Geometry {
             return false;
         }
 
-        // TODO : optimise
         public static bool TriangleIntersectsRectangle(Triangle triangle, Rectangle rectangle) {
+            if (!triangle.BoundingBox.Collides(rectangle)) {
+                return false;
+            }
+            foreach (Point point in triangle.Points) {
+                if (rectangle.Collides(point)) {
+                    return true;
+                }
+            }
+            foreach (Point point in rectangle.Points) {
+                if (triangle.Collides(point)) {
+                    return true;
+                }
+            }
             foreach (Line rectangleLine in rectangle.Lines) {
                 foreach (Line triangleLine in triangle.Lines) {
                     if (rectangleLine.Collides(triangleLine)) {
@@ -107,16 +111,18 @@ namespace SfmlProject.Geometry {
             return false;
         }
 
-        // TODO : optimise
-        public static bool TriangleIntersectsCircle(Triangle triangle, Circle otherCircle) {
-            if (PointInTriangle(otherCircle.Center, triangle)) {
+        public static bool TriangleIntersectsCircle(Triangle triangle, Circle circle) {
+            if (!triangle.BoundingBox.Collides(circle.BoundingBox)) {
+                return false;
+            }
+            if (triangle.Collides(circle.Center)) {
                 return true;
             }
-            if (PointInCircle(triangle.Points[0], otherCircle)) {
+            if (PointInCircle(triangle.Points[0], circle)) {
                 return true;
             }
             foreach (Line line in triangle.Lines) {
-                if (line.Collides(otherCircle)) {
+                if (line.Collides(circle)) {
                     return true;
                 }
             }
@@ -137,8 +143,34 @@ namespace SfmlProject.Geometry {
             return false;
         }
 
-        // TODO : optimise
+        public static bool TriangleIntersectsPolygon(Triangle triangle, Polygon otherPolygon) {
+            if (!triangle.BoundingBox.Collides(otherPolygon.BoundingBox)) {
+                return false;
+            }
+            foreach (Point point in triangle.Points) {
+                if (point.Collides(otherPolygon)) {
+                    return true;
+                }
+            }
+            foreach (Point point in otherPolygon.Points) {
+                if (point.Collides(triangle)) {
+                    return true;
+                }
+            }
+            foreach (Line line in triangle.Lines) {
+                foreach (Line otherLine in otherPolygon.Lines) {
+                    if (line.Collides(otherLine)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         public static bool RectangleIntersectsCircle(Rectangle rectangle, Circle circle) {
+            if (!rectangle.Collides(circle.BoundingBox)) {
+                return false;
+            }
             if (rectangle.Collides(circle.Center)) {
                 return true;
             }
@@ -155,9 +187,46 @@ namespace SfmlProject.Geometry {
             return false;
         }
 
-        // TODO : optimise
-        public static bool RectangleIntersectsPolygon(Rectangle rectangle, Polygon otherPolygon) {
-            throw new NotImplementedException();
+        public static bool RectangleIntersectsPolygon(Rectangle rectangle, Polygon polygon) {
+            if (!polygon.BoundingBox.Collides(rectangle)) {
+                return false;
+            }
+            foreach (Point point in polygon.Points) {
+                if (rectangle.Collides(point)) {
+                    return true;
+                }
+            }
+            foreach (Point point in rectangle.Points) {
+                if (polygon.Collides(point)) {
+                    return true;
+                }
+            }
+            foreach (Line rectangleLine in rectangle.Lines) {
+                foreach (Line polygonLine in polygon.Lines) {
+                    if (rectangleLine.Collides(polygonLine)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static bool CircleIntersectsPolygon(Circle circle, Polygon otherPolygon) {
+            if (!otherPolygon.BoundingBox.Collides(circle.BoundingBox)) {
+                return false;
+            }
+            if (otherPolygon.Collides(circle.Center)) {
+                return true;
+            }
+            if (PointInCircle(otherPolygon.Points[0], circle)) {
+                return true;
+            }
+            foreach (Line line in otherPolygon.Lines) {
+                if (line.Collides(circle)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

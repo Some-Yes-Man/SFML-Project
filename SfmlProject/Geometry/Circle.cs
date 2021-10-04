@@ -35,11 +35,11 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Triangle otherTriangle) {
-            throw new System.NotImplementedException();
+            return CollisionHelper.TriangleIntersectsCircle(otherTriangle, this);
         }
 
         public bool Collides(Rectangle otherRectangle) {
-            throw new System.NotImplementedException();
+            return CollisionHelper.RectangleIntersectsCircle(otherRectangle, this);
         }
 
         public bool Collides(Circle otherCircle) {
@@ -48,8 +48,8 @@ namespace SfmlProject.Geometry {
             return distance.X * distance.X + distance.Y * distance.Y <= maxDistance * maxDistance;
         }
 
-        public bool Collides(Polygon otherShape) {
-            throw new System.NotImplementedException();
+        public bool Collides(Polygon otherPolygon) {
+            return CollisionHelper.CircleIntersectsPolygon(this, otherPolygon);
         }
     }
 }

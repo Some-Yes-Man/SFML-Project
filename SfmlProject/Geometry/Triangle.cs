@@ -5,6 +5,11 @@ namespace SfmlProject.Geometry {
     public class Triangle : Shape, IBoundingBox, ICollidesWith {
         private Rectangle boundingBox;
 
+        // needed for point collision calculations
+        // magic code from the 'internet'; thx to adam https://stackoverflow.com/a/25346777
+        // (where glenn failed: https://stackoverflow.com/a/20861130)
+        private readonly float y23, x32, y31, x13, det, minD, maxD;
+
         public Triangle(Point pointA, Point pointB, Point pointC) : base() {
             this.Points.Add(pointA);
             this.Points.Add(pointB);
@@ -12,6 +17,14 @@ namespace SfmlProject.Geometry {
             this.Lines.Add(new Line(pointA, pointB));
             this.Lines.Add(new Line(pointB, pointC));
             this.Lines.Add(new Line(pointC, pointA));
+
+            this.y23 = pointB.Y - pointC.Y;
+            this.x32 = pointC.X - pointB.X;
+            this.y31 = pointC.Y - pointA.Y;
+            this.x13 = pointA.X - pointC.X;
+            this.det = y23 * x13 - x32 * y31;
+            this.minD = Math.Min(det, 0);
+            this.maxD = Math.Max(det, 0);
         }
 
         public Rectangle BoundingBox {
@@ -25,15 +38,29 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Point otherPoint) {
-            return CollisionHelper.PointInTriangle(otherPoint, this);
+            float dx = otherPoint.X - this.Points[2].X;
+            float dy = otherPoint.Y - this.Points[2].Y;
+
+            float a = y23 * dx + x32 * dy;
+            if (a < minD || a > maxD) { return false; }
+
+            float b = y31 * dx + x13 * dy;
+            if (b < minD || b > maxD) { return false; }
+
+            float c = det - a - b;
+            if (c < minD || c > maxD) { return false; }
+
+            return true;
         }
 
         public bool Collides(Line otherLine) {
             return CollisionHelper.LineIntersectsTriangle(otherLine, this);
         }
 
-        // TODO : optimise?
         public bool Collides(Triangle otherTriangle) {
+            if (!this.BoundingBox.Collides(otherTriangle.BoundingBox)) {
+                return false;
+            }
             foreach (Line line in this.Lines) {
                 foreach (Line otherLine in otherTriangle.Lines) {
                     if (line.Collides(otherLine)) {
@@ -41,7 +68,7 @@ namespace SfmlProject.Geometry {
                     }
                 }
             }
-            return CollisionHelper.PointInTriangle(this.Points[0], otherTriangle);
+            return otherTriangle.Collides(this.Points[0]) || this.Collides(otherTriangle.Points[0]);
         }
 
         public bool Collides(Rectangle otherRectangle) {
@@ -53,7 +80,7 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Polygon otherPolygon) {
-            throw new System.NotImplementedException();
+            return CollisionHelper.TriangleIntersectsPolygon(this, otherPolygon);
         }
     }
 }

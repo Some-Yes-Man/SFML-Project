@@ -31,7 +31,7 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Triangle otherTriangle) {
-            return CollisionHelper.PointInTriangle(this, otherTriangle);
+            return otherTriangle.Collides(this);
         }
 
         public bool Collides(Rectangle otherRectangle) {

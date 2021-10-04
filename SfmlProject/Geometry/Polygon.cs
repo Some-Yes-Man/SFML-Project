@@ -72,7 +72,7 @@ namespace SfmlProject.Geometry {
                     Triangle possibleTriangle = new Triangle(previousPoint, currentPoint, nextPoint);
                     bool validTriangle = true;
                     foreach (Point point in pointsLeft.Where(x => !x.Equals(currentPoint) && !x.Equals(previousPoint) && !x.Equals(nextPoint))) {
-                        if (CollisionHelper.PointInTriangle(point, possibleTriangle)) {
+                        if (possibleTriangle.Collides(point)) {
                             validTriangle = false;
                             break;
                         }
@@ -89,33 +89,36 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Point otherPoint) {
-            throw new NotImplementedException();
+            return CollisionHelper.PointInPolygon(otherPoint, this);
         }
 
         public bool Collides(Line otherLine) {
-            foreach (Line line in this.Lines) {
-                if (line.Collides(otherLine)) {
-                    return true;
-                }
-            }
-            return false;
+            return CollisionHelper.LineIntersectsPolygon(otherLine, this);
         }
 
         public bool Collides(Triangle otherTriangle) {
-            throw new NotImplementedException();
+            return CollisionHelper.TriangleIntersectsPolygon(otherTriangle, this);
         }
 
         public bool Collides(Rectangle otherRectangle) {
-            throw new NotImplementedException();
+            return CollisionHelper.RectangleIntersectsPolygon(otherRectangle, this);
         }
 
         public bool Collides(Circle otherCircle) {
-            throw new NotImplementedException();
+            return CollisionHelper.CircleIntersectsPolygon(otherCircle, this);
         }
 
         public bool Collides(Polygon otherPolygon) {
-            foreach (Line otherLine in otherPolygon.Lines) {
-                if (this.Collides(otherLine)) {
+            if (!this.BoundingBox.Collides(otherPolygon.boundingBox)) {
+                return false;
+            }
+            foreach (Point point in this.Points) {
+                if (point.Collides(otherPolygon)) {
+                    return true;
+                }
+            }
+            foreach (Line line in this.Lines) {
+                if (line.Collides(otherPolygon)) {
                     return true;
                 }
             }
