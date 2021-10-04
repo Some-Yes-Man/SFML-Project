@@ -39,7 +39,7 @@ namespace SfmlProject.Geometry.Tests {
             Assert.IsTrue(triangle.Collides(line2));
         }
 
-        private class LineIntersectsTriangleDataSource : NamedDataSource {
+        private class TriangleIntersectsTriangleDataSource : NamedDataSource {
             public override IEnumerable<object[]> GetData(MethodInfo methodInfo) {
                 yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Triangle(new Point(5, 4), new Point(6, 5), new Point(5, 7)), "Triangle far away." };
                 yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Triangle(new Point(5, 3), new Point(6, 5), new Point(5, 7)), "Triangle with dimensional corner overlap." };
@@ -56,12 +56,83 @@ namespace SfmlProject.Geometry.Tests {
         }
 
         [DataTestMethod]
-        [LineIntersectsTriangleDataSource]
+        [TriangleIntersectsTriangleDataSource]
         public void TriangleIntersectsTriangleTest(bool result, Triangle triangle, Triangle otherTriangle, string name) {
             Assert.AreEqual(result, otherTriangle.Collides(triangle));
             Assert.AreEqual(result, triangle.Collides(otherTriangle));
         }
 
-        // FIXME : continue
+        private class RectangleIntersectsTriangleDataSource : NamedDataSource {
+            public override IEnumerable<object[]> GetData(MethodInfo methodInfo) {
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(5, 4), new Point(7, 5)), "Rectangle far away." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(5, 3), new Point(7, 5)), "Rectangle with dimensional corner overlap." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(5, 2), new Point(7, 5)), "Rectangle with dimensional overlap." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(3.5f, 2.5f), new Point(5, 5)), "Rectangle with one corner in bounding box." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(4, 1), new Point(5, 4)), "Rectangle with one corner on a corner." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(3, 2), new Point(5, 4)), "Rectangle with one corner on an edge." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(3, 0), new Point(5, 1.5f)), "Rectangle with one corner inside and vice-versa." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(3, 1.5f), new Point(5, 4)), "Rectangle with one corner inside and NOT vice-versa." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(1.5f, 0), new Point(3.5f, 2.5f)), "Rectangle with overlap but no corners in triangle or vice-versa." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(0, 0), new Point(5, 4)), "Rectangle with triangle completely contained in it." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Rectangle(new Point(2, 1.5f), new Point(2.5f, 2)), "Rectangle completely contained in triangle." };
+            }
+        }
+
+        [DataTestMethod]
+        [RectangleIntersectsTriangleDataSource]
+        public void RectangleIntersectsTriangleTest(bool result, Triangle triangle, Rectangle rectangle, string name) {
+            Assert.AreEqual(result, triangle.Collides(rectangle));
+            Assert.AreEqual(result, rectangle.Collides(triangle));
+        }
+
+        private class CircleIntersectsTriangleDataSource : NamedDataSource {
+            public override IEnumerable<object[]> GetData(MethodInfo methodInfo) {
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(6, 5), 1), "Circle far away." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(5, 5), 1), "Circle with dimensional 'touch'." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(4, 5), 1), "Circle with dimensional overlap." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(4.1f, 3.1f), 1), "Circle inside bounding box." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(3.9f, 2.9f), 1), "Circle with center inside bounding box." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(3.5f, 2.5f), 1), "Circle with radius intersecting edge." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(2, 4), 1), "Circle with radius intersecting corner." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(2, 3.5f), 1), "Circle intersecting two edges." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(2, 0), 1), "Circle touch edge with radius." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(2.5f, 1.5f), 0.2f), "Circle completely inside triangle." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(2.5f, 1.5f), 2), "Circle containing triangle completely." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(2.3f, 1.7f), 1), "Circle intersecting all three sides but no points." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Circle(new Point(3, 2), 0.5f), "Circle with center on edge and intersecting said edge twice." };
+            }
+        }
+
+        [DataTestMethod]
+        [CircleIntersectsTriangleDataSource]
+        public void CircleIntersectsTriangleTest(bool result, Triangle triangle, Circle circle, string name) {
+            Assert.AreEqual(result, triangle.Collides(circle));
+            Assert.AreEqual(result, circle.Collides(triangle));
+        }
+
+        private class PolygonIntersectsTriangleDataSource : NamedDataSource {
+            public override IEnumerable<object[]> GetData(MethodInfo methodInfo) {
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(7, 6), new Point(5, 6), new Point(8, 8), new Point(8, 4)), "Polygon far away." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(6, 6), new Point(4, 6), new Point(7, 8), new Point(7, 4)), "Polygon with dimensional corner overlap." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 6), new Point(3, 6), new Point(6, 8), new Point(6, 4)), "Polygon with dimensional overlap." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(6, 3), new Point(3.5f, 2.5f), new Point(7, 5), new Point(7, 1)), "Polygon with point in bounding box." };
+                yield return new object[] { false, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(3, 3.1f), new Point(2, 4), new Point(5, 6), new Point(5, 2)), "Polygon with edge in bounding box." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(2, 3), new Point(6, 6), new Point(6, 2)), "Polygon with point on corner." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(3, 2), new Point(6, 6), new Point(6, 2)), "Polygon with point on edge." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(2, 2), new Point(6, 6), new Point(6, 2)), "Polygon with point inside triangle." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(0, 2), new Point(6, 6), new Point(6, 2)), "Polygon with triangle point inside." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(2, 0), new Point(6, 6), new Point(6, 2)), "Polygon with with two edges intersecting two triangle edges." };
+                // kills triangulation
+                //yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(1, 0), new Point(6, 1), new Point(4, 4), new Point(0, 5)), "Polygon containing triangle completely." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(1.5f, 1.5f), new Point(2, 2.5f), new Point(2, 2), new Point(2.5f, 1.5f)), "Polygon completely inside triangle." };
+            }
+        }
+
+        [DataTestMethod]
+        [PolygonIntersectsTriangleDataSource]
+        public void PolygonIntersectsTriangleTest(bool result, Triangle triangle, Polygon polygon, string name) {
+            Assert.AreEqual(result, triangle.Collides(polygon));
+            Assert.AreEqual(result, polygon.Collides(triangle));
+        }
     }
 }

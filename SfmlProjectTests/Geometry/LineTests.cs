@@ -3,7 +3,7 @@ using SfmlProjectTests;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace SfmlProject.Geometry {
+namespace SfmlProject.Geometry.Tests {
     /**
      * Fantastic tool to set up those unit tests.
      * https://www.geogebra.org/geometry
