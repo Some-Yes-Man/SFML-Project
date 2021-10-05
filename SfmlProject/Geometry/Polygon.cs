@@ -12,7 +12,7 @@ namespace SfmlProject.Geometry {
         public Polygon(params Point[] points) {
             // not enough points given
             if (points == null || points.Length < 3) {
-                throw new ArgumentException("Shapes can only be constructed from 3 or more points.");
+                throw new ArgumentException("Polygons can only be constructed from 3 or more points.");
             }
             // check winding order
             float windingCheck = 0;
@@ -33,7 +33,7 @@ namespace SfmlProject.Geometry {
             // lines of shape cross
             foreach (Line currentLine in this.Lines) {
                 if (this.Lines.Any(x => !x.Equals(currentLine) && !NeighboringLines(currentLine, x) && currentLine.Collides(x))) {
-                    throw new ArgumentException("Shapes are not allowed to have intersecting lines.");
+                    throw new ArgumentException("Polygons are not allowed to have intersecting lines.");
                 }
             }
             // check for co-linear lines
@@ -41,7 +41,7 @@ namespace SfmlProject.Geometry {
                 Line currentLine = this.Lines[i];
                 Line nextLine = this.Lines[(i + 1) % this.Lines.Count];
                 if (GeometryUtils.CrossProduct(currentLine.Points[0].Vector - currentLine.Points[1].Vector, nextLine.Points[0].Vector - nextLine.Points[1].Vector) == 0) {
-                    throw new ArgumentException("Shapes are not allowed to have co-linear points (points in a row).");
+                    throw new ArgumentException("Polygons are not allowed to have co-linear points (points in a row).");
                 }
             }
             this.Triangles = this.Triangulate();
@@ -121,7 +121,7 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Polygon otherPolygon) {
-            if (!this.BoundingBox.Collides(otherPolygon.boundingBox)) {
+            if (!this.BoundingBox.Collides(otherPolygon.BoundingBox)) {
                 return false;
             }
             foreach (Point point in this.Points) {

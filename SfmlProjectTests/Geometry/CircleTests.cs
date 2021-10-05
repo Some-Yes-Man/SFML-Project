@@ -1,10 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SfmlProject.Geometry;
 using SfmlProjectTests;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace SfmlProject.Geometry.Tests {
     /**
@@ -94,14 +92,25 @@ namespace SfmlProject.Geometry.Tests {
 
         private class PolygonIntersectsCircleDataSource : NamedDataSource {
             public override IEnumerable<object[]> GetData(MethodInfo methodInfo) {
-                yield return new object[] { false, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(6, 6), new Point(5, 6), new Point(7, 7)), "Circle far away." };
+                yield return new object[] { false, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(6, 6), new Point(5, 6), new Point(7, 7)), "Polygon far away." };
+                yield return new object[] { false, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 4), new Point(6, 6), new Point(5, 6), new Point(7, 7)), "Polygon with dimensional corner overlap." };
+                yield return new object[] { false, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 3), new Point(6, 6), new Point(5, 6), new Point(7, 7)), "Polygon with dimensional overlap." };
+                yield return new object[] { false, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(3.5f, 3.5f), new Point(5, 6), new Point(7, 7)), "Polygon inside bounding box." };
+                yield return new object[] { false, new Circle(new Point(2, 2), 2), new Polygon(new Point(5, 1), new Point(6, 6), new Point(1, 5), new Point(7, 7)), "Polygon overlapping circle in concave bay." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(3, 3), new Point(5, 6), new Point(7, 7)), "Polygon with one corner inside circle." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(0, 0), new Point(5, 6), new Point(7, 7)), "Polygon containing center of circle." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(-1, 1), new Point(5, 6), new Point(7, 7)), "Polygon intersecting circle but no points in circle or vice-versa." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(-2, 3), new Point(5, 6), new Point(7, 7)), "Polygon intersecting with one edge only." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(2, 4), new Point(5, 6), new Point(7, 7)), "Polygon with one corner on circle radius (vertical)." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(6, 5), new Point(3.41421f, 3.41421f), new Point(5, 6), new Point(7, 7)), "Polygon with one corner on circle radius (diagonal)." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(2, 1), new Point(1, 2), new Point(2, 3), new Point(3, 1)), "Polygon completely contained in circle." };
+                yield return new object[] { true, new Circle(new Point(2, 2), 2), new Polygon(new Point(2, -1), new Point(-1, 2), new Point(2, 5), new Point(5, 2)), "Polygon containing circle completely." };
             }
         }
 
         [DataTestMethod]
         [PolygonIntersectsCircleDataSource]
         public void PolygonIntersectsCircleTest(bool result, Circle circle, Polygon polygon, string name) {
-            Assert.Fail();
             Assert.AreEqual(result, circle.Collides(polygon));
             Assert.AreEqual(result, polygon.Collides(circle));
         }
