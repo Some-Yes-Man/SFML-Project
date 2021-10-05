@@ -1,4 +1,5 @@
 ﻿using SfmlProject.Geometry.Base;
+using System;
 using System.Numerics;
 
 namespace SfmlProject.Geometry {
@@ -11,6 +12,12 @@ namespace SfmlProject.Geometry {
             this.Center = point;
             this.Points.Add(point);
             this.Radius = radius;
+            if (radius == 0) {
+                throw new ArgumentException("Circles need a non-zero radius.");
+            }
+        }
+
+        public Circle(float x, float y, float radius) : this(new Point(x, y), radius) {
         }
 
         public Rectangle BoundingBox {
@@ -21,9 +28,6 @@ namespace SfmlProject.Geometry {
                 }
                 return this.boundingBox;
             }
-        }
-
-        public Circle(float x, float y, float radius) : this(new Point(x, y), radius) {
         }
 
         public bool Collides(Point otherPoint) {

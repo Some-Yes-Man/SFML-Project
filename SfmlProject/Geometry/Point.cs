@@ -46,6 +46,18 @@ namespace SfmlProject.Geometry {
             return CollisionHelper.PointInPolygon(this, otherPolygon);
         }
 
+        public override bool Equals(object obj) {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType())) {
+                return false;
+            }
+            Point other = (Point)obj;
+            return this.vector.Equals(other.vector);
+        }
+
+        public override int GetHashCode() {
+            return this.vector.GetHashCode();
+        }
+
         public override string ToString() {
             return string.Format("P[{0}:{1}]", this.X, this.Y);
         }

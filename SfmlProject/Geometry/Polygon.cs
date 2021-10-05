@@ -14,7 +14,19 @@ namespace SfmlProject.Geometry {
             if (points == null || points.Length < 3) {
                 throw new ArgumentException("Shapes can only be constructed from 3 or more points.");
             }
-            this.Points.AddRange(points);
+            // check winding order
+            float windingCheck = 0;
+            for (int i = 0; i < points.Length; i++) {
+                windingCheck += (points[(i + 1) % points.Length].X - points[i].X) * (points[(i + 1) % points.Length].Y + points[i].Y);
+            }
+            // and reverse if CCW (or triangulation might fail)
+            if (windingCheck < 0) {
+                this.Points.AddRange(points.Reverse());
+            }
+            else {
+                this.Points.AddRange(points);
+            }
+
             for (int i = 0; i < points.Length; i++) {
                 this.Lines.Add(new Line(points[i], points[(i + 1) % points.Length]));
             }

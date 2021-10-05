@@ -15,6 +15,9 @@ namespace SfmlProject.Geometry {
         }
 
         public static bool PointInPolygon(Point point, Polygon polygon) {
+            if (!PointInRectangle(point, polygon.BoundingBox)) {
+                return false;
+            }
             foreach (Triangle subTriangle in polygon.Triangles) {
                 if (subTriangle.Collides(point)) {
                     return true;
@@ -24,16 +27,7 @@ namespace SfmlProject.Geometry {
         }
 
         public static bool LineIntersectsTriangle(Line line, Triangle triangle) {
-            Point linePoint1 = line.Points[0];
-            Point linePoint2 = line.Points[1];
-            Point trianglePoint1 = triangle.Points[0];
-            Point trianglePoint2 = triangle.Points[1];
-            Point trianglePoint3 = triangle.Points[2];
-            bool overlapInX = Math.Max(linePoint1.X, linePoint2.X) >= Math.Min(Math.Min(trianglePoint1.X, trianglePoint2.X), trianglePoint3.X)
-                && Math.Min(linePoint1.X, linePoint2.X) <= Math.Max(Math.Max(trianglePoint1.X, trianglePoint2.X), trianglePoint3.X);
-            bool overlapInY = Math.Max(linePoint1.Y, linePoint2.Y) >= Math.Min(Math.Min(trianglePoint1.Y, trianglePoint2.Y), trianglePoint3.Y)
-                && Math.Min(linePoint1.Y, linePoint2.Y) <= Math.Max(Math.Max(trianglePoint1.Y, trianglePoint2.Y), trianglePoint3.Y);
-            if (!overlapInX || !overlapInY) {
+            if (!RectangleIntersectsRectangle(line.BoundingBox, triangle.BoundingBox)) {
                 return false;
             }
             foreach (Line otherLine in triangle.Lines) {
@@ -41,7 +35,7 @@ namespace SfmlProject.Geometry {
                     return true;
                 }
             }
-            return triangle.Collides(linePoint1);
+            return triangle.Collides(line.Points[0]);
         }
 
         public static bool LineIntersectsRectangle(Line line, Rectangle rectangle) {
@@ -130,17 +124,23 @@ namespace SfmlProject.Geometry {
         }
 
         public static bool RectangleIntersectsRectangle(Rectangle rectangle, Rectangle otherRectangle) {
-            foreach (Point point in rectangle.Points) {
-                if (PointInRectangle(point, otherRectangle)) {
-                    return true;
-                }
+            if ((rectangle.Points[0].X < otherRectangle.Points[0].X) && (rectangle.Points[0].X < otherRectangle.Points[2].X)
+                && (rectangle.Points[2].X < otherRectangle.Points[0].X) && (rectangle.Points[2].X < otherRectangle.Points[2].X)) {
+                return false;
             }
-            foreach (Point point in otherRectangle.Points) {
-                if (PointInRectangle(point, rectangle)) {
-                    return true;
-                }
+            if ((rectangle.Points[0].X > otherRectangle.Points[0].X) && (rectangle.Points[0].X > otherRectangle.Points[2].X)
+                && (rectangle.Points[2].X > otherRectangle.Points[0].X) && (rectangle.Points[2].X > otherRectangle.Points[2].X)) {
+                return false;
             }
-            return false;
+            if ((rectangle.Points[0].Y > otherRectangle.Points[0].Y) && (rectangle.Points[0].Y > otherRectangle.Points[2].Y)
+                && (rectangle.Points[2].Y > otherRectangle.Points[0].Y) && (rectangle.Points[2].Y > otherRectangle.Points[2].Y)) {
+                return false;
+            }
+            if ((rectangle.Points[0].Y < otherRectangle.Points[0].Y) && (rectangle.Points[0].Y < otherRectangle.Points[2].Y)
+                && (rectangle.Points[2].Y < otherRectangle.Points[0].Y) && (rectangle.Points[2].Y < otherRectangle.Points[2].Y)) {
+                return false;
+            }
+            return true;
         }
 
         public static bool TriangleIntersectsPolygon(Triangle triangle, Polygon otherPolygon) {

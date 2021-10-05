@@ -1,4 +1,5 @@
 ﻿using SfmlProject.Geometry.Base;
+using SfmlProject.Geometry.Utils;
 using System;
 
 namespace SfmlProject.Geometry {
@@ -17,6 +18,10 @@ namespace SfmlProject.Geometry {
             this.Lines.Add(new Line(pointA, pointB));
             this.Lines.Add(new Line(pointB, pointC));
             this.Lines.Add(new Line(pointC, pointA));
+
+            if (GeometryUtils.CrossProduct(pointB.Vector - pointA.Vector, pointC.Vector - pointB.Vector) == 0) {
+                throw new ArgumentException("Triangle cannot be constructed from co-linear points.");
+            }
 
             this.y23 = pointB.Y - pointC.Y;
             this.x32 = pointC.X - pointB.X;

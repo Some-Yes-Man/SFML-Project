@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SfmlProjectTests;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -19,6 +20,11 @@ namespace SfmlProject.Geometry.Tests {
             Assert.AreEqual(4, triangle.Points[1].Y);
             Assert.AreEqual(5, triangle.Points[2].X);
             Assert.AreEqual(0, triangle.Points[2].Y);
+        }
+
+        [TestMethod()]
+        public void TriangleTest2() {
+            Assert.ThrowsException<ArgumentException>(() => new Triangle(new Point(1, 1), new Point(2, 2), new Point(3, 3)));
         }
 
         [TestMethod()]
@@ -122,8 +128,7 @@ namespace SfmlProject.Geometry.Tests {
                 yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(2, 2), new Point(6, 6), new Point(6, 2)), "Polygon with point inside triangle." };
                 yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(0, 2), new Point(6, 6), new Point(6, 2)), "Polygon with triangle point inside." };
                 yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(5, 4), new Point(2, 0), new Point(6, 6), new Point(6, 2)), "Polygon with with two edges intersecting two triangle edges." };
-                // kills triangulation
-                //yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(1, 0), new Point(6, 1), new Point(4, 4), new Point(0, 5)), "Polygon containing triangle completely." };
+                yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(1, 0), new Point(6, 1), new Point(4, 4), new Point(0, 5)), "Polygon containing triangle completely." };
                 yield return new object[] { true, new Triangle(new Point(1, 1), new Point(2, 3), new Point(4, 1)), new Polygon(new Point(1.5f, 1.5f), new Point(2, 2.5f), new Point(2, 2), new Point(2.5f, 1.5f)), "Polygon completely inside triangle." };
             }
         }
