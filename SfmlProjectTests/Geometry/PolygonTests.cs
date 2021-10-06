@@ -59,12 +59,23 @@ namespace SfmlProject.Geometry.Tests {
         private class PolygonIntersectsPolygonDataSource : NamedDataSource {
             public override IEnumerable<object[]> GetData(MethodInfo methodInfo) {
                 yield return new object[] { false, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(5, 5), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon far away." };
+                yield return new object[] { false, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(5, 4), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with dimensional corner overlap." };
+                yield return new object[] { false, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(5, 3), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with dimensional overlap." };
+                yield return new object[] { false, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(2, 3.5f), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with point in bounding box." };
+                yield return new object[] { false, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(2, 5), new Point(5, 5), new Point(5, 2), new Point(8, 7)), "Polygon overlapping in concave bay." };
+                yield return new object[] { true, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(4, 4), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with corner on corner." };
+                yield return new object[] { true, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 4), new Point(4, 4)), new Polygon(new Point(3, 4), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with corner on horizontal edge." };
+                yield return new object[] { true, new Polygon(new Point(4, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(4, 3), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with corner on vertical edge." };
+                yield return new object[] { true, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 4), new Point(4, 4)), new Polygon(new Point(3, 3.666667f), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with corner on edge." };
+                yield return new object[] { true, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(3, 3.5f), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with point inside." };
+                yield return new object[] { true, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 4), new Point(4, 4)), new Polygon(new Point(1, 3), new Point(6, 6), new Point(8, 6), new Point(5, 7)), "Polygon with edges intersecting." };
+                yield return new object[] { true, new Polygon(new Point(3, 1), new Point(2, 3), new Point(1, 3), new Point(4, 4)), new Polygon(new Point(-1, 4), new Point(3, 0), new Point(8, 6), new Point(5, 7)), "Polygon completely inside other polygon." };
             }
         }
 
         [DataTestMethod]
         [PolygonIntersectsPolygonDataSource]
-        public void PolygonIntersectsCircleTest(bool result, Polygon polygon, Polygon otherPolygon, string name) {
+        public void PolygonIntersectsPolygonTest(bool result, Polygon polygon, Polygon otherPolygon, string name) {
             Assert.AreEqual(result, polygon.Collides(otherPolygon));
             Assert.AreEqual(result, otherPolygon.Collides(polygon));
         }

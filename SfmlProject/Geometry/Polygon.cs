@@ -129,6 +129,11 @@ namespace SfmlProject.Geometry {
                     return true;
                 }
             }
+            foreach (Point point in otherPolygon.Points) {
+                if (point.Collides(this)) {
+                    return true;
+                }
+            }
             foreach (Line line in this.Lines) {
                 if (line.Collides(otherPolygon)) {
                     return true;

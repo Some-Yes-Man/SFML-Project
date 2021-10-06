@@ -4,12 +4,12 @@ using System;
 namespace SfmlProject.Geometry {
     public class Line : Shape, IBoundingBox, ICollidesWith {
 
-        private static readonly double EPSILON = 0.00001;
+        private static readonly float EPSILON = 0.0001f;
 
         private readonly Point pointA;
         private readonly Point pointB;
-        private readonly double slope;
-        private readonly double yIntercept;
+        private readonly float slope;
+        private readonly float yIntercept;
 
         private Rectangle boundingBox;
 
@@ -34,7 +34,8 @@ namespace SfmlProject.Geometry {
         }
 
         public bool Collides(Point otherPoint) {
-            return otherPoint.X >= Math.Min(this.pointA.X, this.pointB.X) && otherPoint.X <= Math.Max(this.pointA.X, this.pointB.X) && Math.Abs(this.slope * otherPoint.X + this.yIntercept - otherPoint.Y) <= EPSILON;
+            return (otherPoint.X >= Math.Min(this.pointA.X, this.pointB.X)) && (otherPoint.X <= Math.Max(this.pointA.X, this.pointB.X))
+                && ((float.IsInfinity(this.slope) && (otherPoint.Y >= Math.Min(this.pointA.Y, this.pointB.Y)) && (otherPoint.Y <= Math.Max(this.pointA.Y, this.pointB.Y))) || (Math.Abs((this.slope * otherPoint.X) + this.yIntercept - otherPoint.Y) <= EPSILON));
         }
 
         public bool Collides(Line other) {
@@ -45,10 +46,10 @@ namespace SfmlProject.Geometry {
                 return false;
             }
             else {
-                double otherAvirtualY = double.IsInfinity(this.slope) ? other.pointA.Y : other.pointA.X * this.slope + this.yIntercept;
-                double otherBvirtualY = double.IsInfinity(this.slope) ? other.pointB.Y : other.pointB.X * this.slope + this.yIntercept;
-                double thisAvirtualY = double.IsInfinity(other.slope) ? this.pointA.Y : this.pointA.X * other.slope + other.yIntercept;
-                double thisBvirtualY = double.IsInfinity(other.slope) ? this.pointB.Y : this.pointB.X * other.slope + other.yIntercept;
+                float otherAvirtualY = float.IsInfinity(this.slope) ? other.pointA.Y : other.pointA.X * this.slope + this.yIntercept;
+                float otherBvirtualY = float.IsInfinity(this.slope) ? other.pointB.Y : other.pointB.X * this.slope + this.yIntercept;
+                float thisAvirtualY = float.IsInfinity(other.slope) ? this.pointA.Y : this.pointA.X * other.slope + other.yIntercept;
+                float thisBvirtualY = float.IsInfinity(other.slope) ? this.pointB.Y : this.pointB.X * other.slope + other.yIntercept;
                 return (other.pointA.Y - otherAvirtualY) * (other.pointB.Y - otherBvirtualY) <= 0 && (this.pointA.Y - thisAvirtualY) * (this.pointB.Y - thisBvirtualY) <= 0;
             }
         }

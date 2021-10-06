@@ -41,7 +41,9 @@ namespace SfmlProject.Geometry.Tests {
                 yield return new object[] { false, new Line(new Point(1, 1), new Point(2, 2)), new Point(1.6f, 1.5f), "Point close but not on the line." };
                 yield return new object[] { false, new Line(new Point(1, 1), new Point(2, 2)), new Point(1f, 1.1f), "Point close to endpoint but not on the line." };
                 yield return new object[] { true, new Line(new Point(1, 1), new Point(2, 2)), new Point(2f, 2f), "Point on endpoint of line." };
-                yield return new object[] { true, new Line(new Point(1, 1), new Point(2, 2)), new Point(1.3f, 1.3f), "Point somewhere on the line." };
+                yield return new object[] { true, new Line(new Point(1, 1), new Point(2, 2)), new Point(1.3f, 1.3f), "Point somewhere on diagonal line." };
+                yield return new object[] { true, new Line(new Point(1, 1), new Point(1, 3)), new Point(1, 2), "Point somewhere on vertical line." };
+                yield return new object[] { true, new Line(new Point(1, 1), new Point(3, 1)), new Point(2, 1), "Point somewhere on horizontal line." };
             }
         }
 
