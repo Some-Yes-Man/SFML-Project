@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using SFML.Graphics;
+using SfmlProject.Graphic;
+using System.Collections.Generic;
 
 namespace SfmlProject.Geometry.Base {
-    public class Shape {
+    public abstract class Shape : IRenderable {
         public List<Point> Points { get; private set; }
         public List<Line> Lines { get; private set; }
+        public abstract Drawable Renderable { get; }
 
         protected Shape() {
             this.Points = new List<Point>();

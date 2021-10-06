@@ -1,10 +1,13 @@
-﻿using SfmlProject.Geometry.Base;
+﻿using SFML.Graphics;
+using SfmlProject.Geometry.Base;
+using SfmlProject.Graphic;
 using System.Numerics;
 
 namespace SfmlProject.Geometry {
-    public class Point : ICollidesWith {
+    public class Point : ICollidesWith, IRenderable {
 
         private Vector2 vector = new Vector2();
+        private CircleShape renderable;
 
         public float X {
             get { return this.vector.X; }
@@ -20,6 +23,16 @@ namespace SfmlProject.Geometry {
 
         public Point(float x, float y) {
             this.vector = new Vector2(x, y);
+        }
+
+        public Drawable Renderable {
+            get {
+                if (this.renderable == null) {
+                    this.renderable = new CircleShape(1f);
+                    this.renderable.Position = new SFML.System.Vector2f(this.X, this.Y);
+                }
+                return this.renderable;
+            }
         }
 
         public bool Collides(Point otherPoint) {

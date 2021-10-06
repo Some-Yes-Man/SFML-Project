@@ -4,9 +4,9 @@ using SFML.Audio;
 using SFML.Graphics;
 using SFML.Window;
 using SFML.System;
-using SfmlProject.Data;
-using Newtonsoft.Json;
-using System.IO;
+using System.Collections.Generic;
+using SfmlProject.Graphic;
+using SfmlProject.Geometry;
 
 namespace SfmlProject {
     class Program {
@@ -15,31 +15,13 @@ namespace SfmlProject {
         static void Main(string[] args) {
             LOGGER.Info("Hello World!");
 
-            Level level = new Level("ExampleLevel");
-            level.AddGeometry(new LevelGeometry(new Vector2f(100, 150), new Vector2f(120, 50), new Vector2f(200, 80), new Vector2f(140, 210)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(100, 200), new Vector2f(120, 250), new Vector2f(60, 300)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(200, 260), new Vector2f(220, 150), new Vector2f(300, 200), new Vector2f(350, 320)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(340, 60), new Vector2f(360, 40), new Vector2f(370, 70)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(450, 190), new Vector2f(560, 170), new Vector2f(540, 270), new Vector2f(430, 290)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(400, 95), new Vector2f(580, 50), new Vector2f(480, 150)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(660, 250), new Vector2f(720, 170), new Vector2f(950, 270), new Vector2f(900, 290)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(695, 40), new Vector2f(780, 120), new Vector2f(680, 140), new Vector2f(930, 190)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(600, 325), new Vector2f(750, 425), new Vector2f(900, 400), new Vector2f(850, 525), new Vector2f(900, 700)));
-            // problems ^^
-            level.AddGeometry(new LevelGeometry(new Vector2f(100, 500), new Vector2f(100, 600), new Vector2f(200, 500)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(100, 650), new Vector2f(100, 750), new Vector2f(200, 750)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(250, 500), new Vector2f(250, 750), new Vector2f(300, 400)));
-            level.AddGeometry(new LevelGeometry(new Vector2f(500, 500), new Vector2f(600, 550), new Vector2f(600, 600), new Vector2f(500, 700)));
-            // concav shape
-            level.AddGeometry(new LevelGeometry(new Vector2f(600, 700), new Vector2f(800, 700), new Vector2f(750, 690), new Vector2f(700, 500), new Vector2f(650, 690)));
-
-            JsonSerializer jsonSerializer = new JsonSerializer();
-            jsonSerializer.Formatting = Formatting.Indented;
-            using (StreamWriter sw = new StreamWriter("ExampleLevel.json")) {
-                using (JsonWriter js = new JsonTextWriter(sw)) {
-                    jsonSerializer.Serialize(js, level);
-                }
-            }
+            //JsonSerializer jsonSerializer = new JsonSerializer();
+            //jsonSerializer.Formatting = Formatting.Indented;
+            //using (StreamWriter sw = new StreamWriter("ExampleLevel.json")) {
+            //    using (JsonWriter js = new JsonTextWriter(sw)) {
+            //        jsonSerializer.Serialize(js, level);
+            //    }
+            //}
 
             // create & configure window
             ContextSettings settings = new ContextSettings();
@@ -85,7 +67,7 @@ namespace SfmlProject {
             Sprite sprite = new Sprite(texture);
             sprite.Color = Color.Yellow;
             sprite.Scale = new Vector2f(0.5f, 0.5f);
-            sprite.Position = new Vector2f(10, 10);
+            sprite.Position = new Vector2f(400, 10);
 
             // WOOD :D
             Texture woodTexture = new Texture("Resources/wood.jpg");
@@ -95,6 +77,13 @@ namespace SfmlProject {
             Clock fpsClock = new Clock();
             int fpsCount = 0;
             Clock frameClock = new Clock();
+
+            List<IRenderable> stuff = new List<IRenderable>();
+            stuff.Add(new Point(50, 300));
+            stuff.Add(new Line(new Point(10, 10), new Point(10, 100)));
+            stuff.Add(new Triangle(new Point(100, 100), new Point(200, 200), new Point(100, 180)));
+            stuff.Add(new Polygon(new Point(400, 400), new Point(300, 400), new Point(500, 500), new Point(400, 300)));
+            stuff.Add(new Circle(new Point(100, 300), 50));
 
             while (renderWindow.IsOpen && !Keyboard.IsKeyPressed(Keyboard.Key.Escape)) {
                 // important! trigger event processing; must be called in window thread
@@ -115,14 +104,10 @@ namespace SfmlProject {
                  * SCENE
                  */
                 // shapes
-                foreach (LevelGeometry geometry in level.Geometry) {
-                    // convex is VERY relaxed; as long as the shape can be constructed from a triangle fan, you're fine (center of gravity)
-                    ConvexShape shape = new ConvexShape((uint)geometry.Coordinates.Count);
-                    for (int i = 0; i < geometry.Coordinates.Count; i++) {
-                        shape.SetPoint((uint)i, geometry.Coordinates[i]);
-                    }
-                    renderWindow.Draw(shape);
+                foreach (IRenderable renderItem in stuff) {
+                    renderWindow.Draw(renderItem.Renderable);
                 }
+
                 // sprite
                 renderWindow.Draw(sprite);
                 // textured shape

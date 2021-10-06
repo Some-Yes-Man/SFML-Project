@@ -5,6 +5,7 @@ using System;
 namespace SfmlProject.Geometry {
     public class Triangle : Shape, IBoundingBox, ICollidesWith {
         private Rectangle boundingBox;
+        private SFML.Graphics.ConvexShape renderable;
 
         // needed for point collision calculations
         // magic code from the 'internet'; thx to adam https://stackoverflow.com/a/25346777
@@ -39,6 +40,18 @@ namespace SfmlProject.Geometry {
                         new Point(Math.Max(Math.Max(Points[0].X, Points[1].X), Points[2].X), Math.Max(Math.Max(Points[0].Y, Points[1].Y), Points[2].Y)));
                 }
                 return this.boundingBox;
+            }
+        }
+
+        public override SFML.Graphics.Drawable Renderable {
+            get {
+                if (this.renderable == null) {
+                    this.renderable = new SFML.Graphics.ConvexShape(3);
+                    for (int i = 0; i < 3; i++) {
+                        this.renderable.SetPoint((uint)i, new SFML.System.Vector2f(this.Points[i].X, this.Points[i].Y));
+                    }
+                }
+                return this.renderable;
             }
         }
 

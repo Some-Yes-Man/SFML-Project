@@ -3,6 +3,8 @@ using System;
 
 namespace SfmlProject.Geometry {
     public class Rectangle : Shape, IBoundingBox, ICollidesWith {
+        private SFML.Graphics.RectangleShape renderable;
+
         public Point UpperLeft { get; set; }
         public Point LowerRight { get; set; }
 
@@ -35,6 +37,16 @@ namespace SfmlProject.Geometry {
         public Rectangle BoundingBox {
             get {
                 return this;
+            }
+        }
+
+        public override SFML.Graphics.Drawable Renderable {
+            get {
+                if (this.renderable == null) {
+                    this.renderable = new SFML.Graphics.RectangleShape(new SFML.System.Vector2f(this.LowerRight.X - this.UpperLeft.X, this.LowerRight.Y - this.UpperLeft.Y));
+                    this.renderable.Position = new SFML.System.Vector2f(this.UpperLeft.X, this.UpperLeft.Y);
+                }
+                return this.renderable;
             }
         }
 

@@ -3,10 +3,13 @@ using System.Linq;
 using System.Collections.Generic;
 using SfmlProject.Geometry.Base;
 using SfmlProject.Geometry.Utils;
+using SfmlProject.Graphic;
 
 namespace SfmlProject.Geometry {
     public class Polygon : Shape, IBoundingBox, ICollidesWith {
         private Rectangle boundingBox;
+        private DrawablePolygon renderable;
+
         public HashSet<Triangle> Triangles { get; private set; }
 
         public Polygon(params Point[] points) {
@@ -63,6 +66,15 @@ namespace SfmlProject.Geometry {
                     this.boundingBox = new Rectangle(new Point(minX, minY), new Point(maxX, maxY));
                 }
                 return this.boundingBox;
+            }
+        }
+
+        public override SFML.Graphics.Drawable Renderable {
+            get {
+                if (this.renderable == null) {
+                    this.renderable = new DrawablePolygon(this.Triangles);
+                }
+                return this.renderable;
             }
         }
 

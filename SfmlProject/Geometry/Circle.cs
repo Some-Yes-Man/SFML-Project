@@ -5,6 +5,8 @@ using System.Numerics;
 namespace SfmlProject.Geometry {
     public class Circle : Shape, IBoundingBox, ICollidesWith {
         private Rectangle boundingBox;
+        private SFML.Graphics.CircleShape renderable;
+
         public Point Center { get; set; }
         public float Radius { get; set; }
 
@@ -27,6 +29,16 @@ namespace SfmlProject.Geometry {
                         new Point(this.Center.X + this.Radius, this.Center.Y + this.Radius));
                 }
                 return this.boundingBox;
+            }
+        }
+
+        public override SFML.Graphics.Drawable Renderable {
+            get {
+                if (this.renderable == null) {
+                    this.renderable = new SFML.Graphics.CircleShape(this.Radius);
+                    this.renderable.Position = new SFML.System.Vector2f(this.Center.X, this.Center.Y);
+                }
+                return this.renderable;
             }
         }
 

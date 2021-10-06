@@ -1,4 +1,6 @@
-﻿using SfmlProject.Geometry.Base;
+﻿using SFML.System;
+using SfmlProject.Geometry.Base;
+using SfmlProject.Graphic;
 using System;
 
 namespace SfmlProject.Geometry {
@@ -12,6 +14,7 @@ namespace SfmlProject.Geometry {
         private readonly float yIntercept;
 
         private Rectangle boundingBox;
+        private DrawableLine renderable;
 
         public Line(Point pointA, Point pointB) : base() {
             this.pointA = pointA;
@@ -30,6 +33,15 @@ namespace SfmlProject.Geometry {
                     this.boundingBox = new Rectangle(pointA, pointB);
                 }
                 return this.boundingBox;
+            }
+        }
+
+        public override SFML.Graphics.Drawable Renderable {
+            get {
+                if (this.renderable == null) {
+                    this.renderable = new DrawableLine(new Vector2f(this.pointA.X, this.pointA.Y), new Vector2f(this.pointB.X, this.pointB.Y));
+                }
+                return this.renderable;
             }
         }
 
