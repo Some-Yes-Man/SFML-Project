@@ -9,8 +9,8 @@ namespace SfmlProject.Geometry {
         }
 
         public static bool PointInCircle(Point point, Circle circle) {
-            double x = point.X - circle.Center.X;
-            double y = point.Y - circle.Center.Y;
+            float x = point.X - circle.Center.X;
+            float y = point.Y - circle.Center.Y;
             return x * x + y * y <= circle.Radius * circle.Radius;
         }
 
