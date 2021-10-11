@@ -7,10 +7,21 @@ using SFML.System;
 using System.Collections.Generic;
 using SfmlProject.Graphic;
 using SfmlProject.Geometry;
+using SfmlProject.Entities;
+using SfmlProject.Map;
+using System.Linq;
 
 namespace SfmlProject {
     class Program {
         private static readonly Logger LOGGER = LogManager.GetLogger("SFMLTest");
+
+        private static readonly int ENTITY_INCREMENT = 50;
+        private static readonly float MIN_UNIT_RANGE = 5;
+        private static readonly float MAX_UNIT_RANGE = 30;
+        private static readonly Random PRNG = new Random();
+
+        private static HashSet<GameUnit> gameEntities = new HashSet<GameUnit>();
+        private static EntityLocationCache locationCache = new EntityLocationCache(512, 64);
 
         static void Main(string[] args) {
             LOGGER.Info("Hello World!");
@@ -49,12 +60,18 @@ namespace SfmlProject {
             music.Play();
 
             Font font = new Font("Resources/KatetheGreat.ttf");
-            Text fpsText = new Text("", font, 50);
+            Text fpsText = new Text("", font, 40);
             fpsText.LetterSpacing = 1.5f;
             fpsText.FillColor = Color.Magenta;
-            Text frameText = new Text("", font, 50);
+            Text frameText = new Text("", font, 40);
             frameText.LetterSpacing = 1.5f;
-            frameText.FillColor = Color.Magenta;
+            frameText.FillColor = Color.Red;
+            Text detectionText = new Text("", font, 40);
+            detectionText.LetterSpacing = 1.5f;
+            detectionText.FillColor = Color.Yellow;
+            Text unitText = new Text("", font, 40);
+            unitText.LetterSpacing = 1.5f;
+            unitText.FillColor = Color.Blue;
 
             // textures are stored in video memory (fast to draw); images are stored in system memory (fast to modify)
             // use as FEW textures as possible; they are expensive; cut sprites from bigger textures instead
@@ -104,23 +121,42 @@ namespace SfmlProject {
                  * SCENE
                  */
                 // shapes
-                foreach (IRenderable renderItem in stuff) {
-                    renderWindow.Draw(renderItem.Renderable);
+                //foreach (IRenderable renderItem in stuff) {
+                //    renderWindow.Draw(renderItem.Renderable);
+                //}
+
+                long detectedUnits = 0;
+                // units
+                RectangleShape unitShape = new RectangleShape(new Vector2f(1f, 1f));
+                foreach (GameUnit unit in gameEntities) {
+                    detectedUnits += locationCache.FindEntities(unit.DetectionRange).Count;
+                    unitShape.Position = new Vector2f(unit.Position.X, unit.Position.Y);
+                    renderWindow.Draw(unitShape);
                 }
 
-                // sprite
-                renderWindow.Draw(sprite);
-                // textured shape
-                CircleShape circle = new CircleShape(50.0f);
-                circle.Position = new Vector2f(300, 300);
-                circle.Texture = woodTexture;
-                circle.TextureRect = new IntRect(0, 0, 100, 100);
-                renderWindow.Draw(circle);
+                //// sprite
+                //renderWindow.Draw(sprite);
+                //// textured shape
+                //CircleShape circle = new CircleShape(50.0f);
+                //circle.Position = new Vector2f(300, 300);
+                //circle.Texture = woodTexture;
+                //circle.TextureRect = new IntRect(0, 0, 100, 100);
+                //renderWindow.Draw(circle);
 
-                // timing
+                // timing info
                 frameText.DisplayedString = frameClock.Restart().AsMilliseconds() + "ms";
                 frameText.Position = new Vector2f(renderWindow.Size.X - frameText.GetLocalBounds().Width - 5, 50);
                 renderWindow.Draw(frameText);
+
+                // detection info
+                detectionText.DisplayedString = "Detections: " + detectedUnits;
+                detectionText.Position = new Vector2f(renderWindow.Size.X - detectionText.GetLocalBounds().Width - 5, 100);
+                renderWindow.Draw(detectionText);
+
+                // unit info
+                unitText.DisplayedString = "Units: " + gameEntities.Count;
+                unitText.Position = new Vector2f(renderWindow.Size.X - unitText.GetLocalBounds().Width - 5, 150);
+                renderWindow.Draw(unitText);
 
                 // switch buffers
                 renderWindow.Display();
@@ -128,10 +164,41 @@ namespace SfmlProject {
             }
         }
 
+        // testing stuff
+        private static void IncreaseEntityCount() {
+            for (int i = 0; i < ENTITY_INCREMENT; i++) {
+                GameUnit unit = new GameUnit(new Point(PRNG.Next(1, 512), PRNG.Next(1, 512)), (float)(PRNG.NextDouble() * (MAX_UNIT_RANGE - MIN_UNIT_RANGE) + MIN_UNIT_RANGE));
+                locationCache.AddEntity(unit);
+                gameEntities.Add(unit);
+            }
+            LOGGER.Debug("Increased entity count to " + gameEntities.Count);
+        }
+
+        private static void DecreaseEntityCount() {
+            if (gameEntities.Count > 0) {
+                List<GameUnit> removedUnits = gameEntities.TakeLast(ENTITY_INCREMENT).ToList();
+                foreach (GameUnit unit in removedUnits) {
+                    locationCache.RemoveEntity(unit);
+                    gameEntities.Remove(unit);
+                }
+            }
+            LOGGER.Debug("Decreased entity count to " + gameEntities.Count);
+        }
+
         // input events
 
         private static void RenderWindow_KeyPressed(object sender, KeyEventArgs e) {
             LOGGER.Debug("KeyPressed: " + e.ToString());
+            switch (e.Code) {
+                case Keyboard.Key.Up:
+                    IncreaseEntityCount();
+                    break;
+                case Keyboard.Key.Down:
+                    DecreaseEntityCount();
+                    break;
+                default:
+                    break;
+            }
         }
 
         private static void RenderWindow_KeyReleased(object sender, KeyEventArgs e) {

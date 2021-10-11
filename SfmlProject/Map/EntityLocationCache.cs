@@ -1,5 +1,6 @@
 ﻿using SfmlProject.Entities;
 using SfmlProject.Geometry;
+using System;
 using System.Collections.Generic;
 
 namespace SfmlProject.Map {
@@ -100,6 +101,11 @@ namespace SfmlProject.Map {
             int minY = (int)(circle.Center.Y - circle.Radius) / chunkSize;
             int maxX = (int)(circle.Center.X + circle.Radius) / chunkSize;
             int maxY = (int)(circle.Center.Y + circle.Radius) / chunkSize;
+
+            minX = Math.Max(0, minX);
+            minY = Math.Max(0, minY);
+            maxX = Math.Min(this.chunkCount - 1, maxX);
+            maxY = Math.Min(this.chunkCount - 1, maxY);
 
             HashSet<GameEntity> entitiesInRange = new HashSet<GameEntity>();
             for (int y = minY; y <= maxY; y++) {
