@@ -2,6 +2,7 @@
 using SfmlProject.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace SfmlProject.Map {
     public class EntityLocationCache {
@@ -74,8 +75,7 @@ namespace SfmlProject.Map {
             this.chunkLookup.Remove(entity);
         }
 
-        // Predicate<GameEntity> predicate
-        public HashSet<GameEntity> FindEntities(Rectangle rectangle) {
+        public HashSet<GameEntity> FindAllEntities(Rectangle rectangle) {
             int minX = (int)rectangle.UpperLeft.X / chunkSize;
             int minY = (int)rectangle.UpperLeft.Y / chunkSize;
             int maxX = (int)rectangle.LowerRight.X / chunkSize;
@@ -95,12 +95,11 @@ namespace SfmlProject.Map {
             return entitiesInRange;
         }
 
-        // Predicate<GameEntity> predicate
-        public HashSet<GameEntity> FindEntities(Circle circle) {
-            int minX = (int)(circle.Center.X - circle.Radius) / chunkSize;
-            int minY = (int)(circle.Center.Y - circle.Radius) / chunkSize;
-            int maxX = (int)(circle.Center.X + circle.Radius) / chunkSize;
-            int maxY = (int)(circle.Center.Y + circle.Radius) / chunkSize;
+        public HashSet<GameEntity> FindAllEntities(Vector2 center, float radius) {
+            int minX = (int)(center.X - radius) / chunkSize;
+            int minY = (int)(center.Y - radius) / chunkSize;
+            int maxX = (int)(center.X + radius) / chunkSize;
+            int maxY = (int)(center.Y + radius) / chunkSize;
 
             minX = Math.Max(0, minX);
             minY = Math.Max(0, minY);
@@ -111,9 +110,9 @@ namespace SfmlProject.Map {
             for (int y = minY; y <= maxY; y++) {
                 for (int x = minX; x <= maxX; x++) {
                     foreach (GameEntity entity in this.chunkArray[x, y]) {
-                        float xDiff = entity.Position.X - circle.Center.X;
-                        float yDiff = entity.Position.Y - circle.Center.Y;
-                        if (xDiff * xDiff + yDiff * yDiff <= circle.Radius * circle.Radius) {
+                        float xDiff = entity.Position.X - center.X;
+                        float yDiff = entity.Position.Y - center.Y;
+                        if (xDiff * xDiff + yDiff * yDiff <= radius * radius) {
                             entitiesInRange.Add(entity);
                         }
                     }

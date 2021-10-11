@@ -3,6 +3,7 @@ using SfmlProject.Entities;
 using SfmlProject.Geometry;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace SfmlProject.Map.Tests {
     [TestClass()]
@@ -73,7 +74,7 @@ namespace SfmlProject.Map.Tests {
                 locationCache.AddEntity(entity);
             }
 
-            HashSet<GameEntity> foundEntities = locationCache.FindEntities(new Circle(new Point(4, 4), 3));
+            HashSet<GameEntity> foundEntities = locationCache.FindAllEntities(new Vector2(4, 4), 3);
 
             Assert.AreEqual(validEntities.Count, foundEntities.Count);
             Assert.IsTrue(validEntities.All(x => foundEntities.Any(y => y.Equals(x))));
@@ -97,7 +98,7 @@ namespace SfmlProject.Map.Tests {
                 locationCache.AddEntity(entity);
             }
 
-            HashSet<GameEntity> foundEntities = locationCache.FindEntities(new Rectangle(new Point(4, 4), new Point(7.5f, 5.5f)));
+            HashSet<GameEntity> foundEntities = locationCache.FindAllEntities(new Rectangle(new Point(4, 4), new Point(7.5f, 5.5f)));
 
             Assert.AreEqual(validEntities.Count, foundEntities.Count);
             Assert.IsTrue(validEntities.All(x => foundEntities.Any(y => y.Equals(x))));

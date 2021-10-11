@@ -36,7 +36,8 @@ namespace SfmlProject {
 
             // create & configure window
             ContextSettings settings = new ContextSettings();
-            settings.AntialiasingLevel = 0;
+            settings.AntialiasingLevel = 2;
+            // 'Styles' determine the window decorations (like min/max/close buttons and so on)
             RenderWindow renderWindow = new RenderWindow(new VideoMode(1000, 800), "SFML-Test", Styles.Close, settings);
             // do NOT mix frame limit and vertical sync
             renderWindow.SetFramerateLimit(60);
@@ -47,13 +48,15 @@ namespace SfmlProject {
             renderWindow.MouseEntered += RenderWindow_MouseEntered;
             renderWindow.MouseLeft += RenderWindow_MouseLeft;
             renderWindow.MouseMoved += RenderWindow_MouseMoved;
+            renderWindow.Resized += RenderWindow_Resized;
             // inputs
             renderWindow.KeyPressed += RenderWindow_KeyPressed;
             renderWindow.KeyReleased += RenderWindow_KeyReleased;
             renderWindow.MouseButtonPressed += RenderWindow_MouseButtonPressed;
             renderWindow.MouseButtonReleased += RenderWindow_MouseButtonReleased;
             renderWindow.MouseWheelScrolled += RenderWindow_MouseWheelScrolled;
-            renderWindow.Resized += RenderWindow_Resized;
+            renderWindow.TextEntered += RenderWindow_TextEntered;
+            //renderWindow.SensorChanged
 
             Music music = new Music("Resources/HausAmSeeSnippet.ogg");
             music.Volume = 10;
@@ -106,7 +109,7 @@ namespace SfmlProject {
                 // important! trigger event processing; must be called in window thread
                 renderWindow.DispatchEvents();
 
-                // rendering (if done in another thread, deactivate renderWindow in this thread and activate it in the other first)
+                // rendering (if done in another thread, deactivate renderWindow in this thread and activate it in the new one first)
                 renderWindow.Clear();
                 // FPS
                 if (fpsClock.ElapsedTime.AsMilliseconds() >= 1000) {
@@ -129,13 +132,20 @@ namespace SfmlProject {
                 // units
                 RectangleShape unitShape = new RectangleShape(new Vector2f(1f, 1f));
                 foreach (GameUnit unit in gameEntities) {
-                    detectedUnits += locationCache.FindEntities(unit.DetectionRange).Count;
+                    detectedUnits += locationCache.FindAllEntities(unit.Position.Vector, unit.DetectionRange).Count;
                     unitShape.Position = new Vector2f(unit.Position.X, unit.Position.Y);
                     renderWindow.Draw(unitShape);
                 }
 
-                //// sprite
-                //renderWindow.Draw(sprite);
+                //foreach (IRenderable renderItem in stuff) {
+                //    renderWindow.Draw(renderItem.Renderable);
+                //}
+
+                // sprite + keyboard/mouse state (different than events; can directly access input hw state)
+                if (Mouse.IsButtonPressed(Mouse.Button.Right) || Keyboard.IsKeyPressed(Keyboard.Key.E)) {
+                    renderWindow.Draw(sprite);
+                }
+
                 //// textured shape
                 //CircleShape circle = new CircleShape(50.0f);
                 //circle.Position = new Vector2f(300, 300);
@@ -219,6 +229,10 @@ namespace SfmlProject {
 
         private static void RenderWindow_MouseMoved(object sender, MouseMoveEventArgs e) {
             LOGGER.Debug("MouseMoved: " + e.X + ":" + e.Y);
+        }
+
+        private static void RenderWindow_TextEntered(object sender, TextEventArgs e) {
+            LOGGER.Debug("TextEntered: " + e.ToString());
         }
 
         // window events
