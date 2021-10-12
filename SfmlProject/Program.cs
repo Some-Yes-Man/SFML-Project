@@ -1,14 +1,16 @@
-﻿using System;
-using NLog;
+﻿using NLog;
 using SFML.Audio;
 using SFML.Graphics;
-using SFML.Window;
 using SFML.System;
-using System.Collections.Generic;
-using SfmlProject.Graphic;
-using SfmlProject.Geometry;
+using SFML.Window;
+using SfmlProject.Config;
 using SfmlProject.Entities;
+using SfmlProject.Geometry;
+using SfmlProject.Graphic;
 using SfmlProject.Map;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace SfmlProject {
@@ -20,27 +22,22 @@ namespace SfmlProject {
         private static readonly float MAX_UNIT_RANGE = 30;
         private static readonly Random PRNG = new Random();
 
-        private static HashSet<GameUnit> gameEntities = new HashSet<GameUnit>();
-        private static EntityLocationCache locationCache = new EntityLocationCache(512, 64);
+        private static readonly HashSet<GameUnit> gameEntities = new HashSet<GameUnit>();
+        private static readonly EntityLocationCache locationCache = new EntityLocationCache(512, 64);
+
+        private static readonly Font font = new Font("Resources/KatetheGreat.ttf");
+
+        private static GameConfig gameConfig = new GameConfig() { ResolutionX = 1000, ResolutionY = 800, FrameLimit = 60, Settings = new ContextSettings() { AntialiasingLevel = 2 } };
+        private static RenderWindow renderWindow;
+        private static BackgroundWorker renderWorker;
 
         static void Main(string[] args) {
-            LOGGER.Info("Hello World!");
+            LOGGER.Info("Engine Startup.");
 
-            //JsonSerializer jsonSerializer = new JsonSerializer();
-            //jsonSerializer.Formatting = Formatting.Indented;
-            //using (StreamWriter sw = new StreamWriter("ExampleLevel.json")) {
-            //    using (JsonWriter js = new JsonTextWriter(sw)) {
-            //        jsonSerializer.Serialize(js, level);
-            //    }
-            //}
-
-            // create & configure window
-            ContextSettings settings = new ContextSettings();
-            settings.AntialiasingLevel = 2;
             // 'Styles' determine the window decorations (like min/max/close buttons and so on)
-            RenderWindow renderWindow = new RenderWindow(new VideoMode(1000, 800), "SFML-Test", Styles.Close, settings);
+            renderWindow = new RenderWindow(new VideoMode(gameConfig.ResolutionX, gameConfig.ResolutionY), "SFML Project", Styles.Close, gameConfig.Settings);
             // do NOT mix frame limit and vertical sync
-            renderWindow.SetFramerateLimit(60);
+            renderWindow.SetFramerateLimit(gameConfig.FrameLimit);
             // window events
             renderWindow.Closed += RenderWindow_Closed;
             renderWindow.GainedFocus += RenderWindow_GainedFocus;
@@ -58,11 +55,85 @@ namespace SfmlProject {
             renderWindow.TextEntered += RenderWindow_TextEntered;
             //renderWindow.SensorChanged
 
-            Music music = new Music("Resources/HausAmSeeSnippet.ogg");
-            music.Volume = 10;
-            music.Play();
+            // rendering (if done in another thread, deactivate renderWindow in this thread and activate it in the new one first)
+            renderWindow.SetActive(false);
 
-            Font font = new Font("Resources/KatetheGreat.ttf");
+            // setup background rendering worker; start it
+            renderWorker = new BackgroundWorker();
+            renderWorker.DoWork += RenderWorker_DoWork;
+            renderWorker.RunWorkerCompleted += RenderWorker_RunWorkerCompleted;
+            renderWorker.RunWorkerAsync(renderWindow);
+
+            while (renderWindow.IsOpen) {
+                renderWindow.DispatchEvents();
+            }
+
+            //JsonSerializer jsonSerializer = new JsonSerializer();
+            //jsonSerializer.Formatting = Formatting.Indented;
+            //using (StreamWriter sw = new StreamWriter("ExampleLevel.json")) {
+            //    using (JsonWriter js = new JsonTextWriter(sw)) {
+            //        jsonSerializer.Serialize(js, level);
+            //    }
+            //}
+
+            //Music music = new Music("Resources/HausAmSeeSnippet.ogg");
+            //music.Volume = 30;
+            //music.Play();
+
+            //// textures are stored in video memory (fast to draw); images are stored in system memory (fast to modify)
+            //// use as FEW textures as possible; they are expensive; cut sprites from bigger textures instead
+            //Image image = new Image("Resources/AmongUs.png");
+            //image.FlipHorizontally();
+            //Texture texture = new Texture(image);
+            //texture.Smooth = true;
+            //texture.Repeated = false;
+            ////Texture texture = new Texture("Resources/AmongUs.png");
+            //Sprite sprite = new Sprite(texture);
+            //sprite.Color = Color.Yellow;
+            //sprite.Scale = new Vector2f(0.5f, 0.5f);
+            //sprite.Position = new Vector2f(400, 10);
+
+            //// WOOD :D
+            //Texture woodTexture = new Texture("Resources/wood.jpg");
+            //woodTexture.Repeated = true;
+            //woodTexture.Smooth = true;
+
+            //List<IRenderable> stuff = new List<IRenderable>();
+            //stuff.Add(new Point(50, 300));
+            //stuff.Add(new Line(new Point(10, 10), new Point(10, 100)));
+            //stuff.Add(new Triangle(new Point(100, 100), new Point(200, 200), new Point(100, 180)));
+            //stuff.Add(new Polygon(new Point(400, 400), new Point(300, 400), new Point(500, 500), new Point(400, 300)));
+            //stuff.Add(new Circle(new Point(100, 300), 50));
+
+            /**
+             * SCENE
+             */
+            // shapes
+            //foreach (IRenderable renderItem in stuff) {
+            //    renderWindow.Draw(renderItem.Renderable);
+            //}
+
+            //foreach (IRenderable renderItem in stuff) {
+            //    renderWindow.Draw(renderItem.Renderable);
+            //}
+
+            //// textured shape
+            //CircleShape circle = new CircleShape(50.0f);
+            //circle.Position = new Vector2f(300, 300);
+            //circle.Texture = woodTexture;
+            //circle.TextureRect = new IntRect(0, 0, 100, 100);
+            //renderWindow.Draw(circle);
+
+            //// sprite + keyboard/mouse state (different than events; can directly access input hw state)
+            //if (Mouse.IsButtonPressed(Mouse.Button.Right) || Keyboard.IsKeyPressed(Keyboard.Key.E)) {
+            //    renderWindow.Draw(sprite);
+            //}
+        }
+
+        private static void RenderWorker_DoWork(object sender, DoWorkEventArgs e) {
+            LOGGER.Info("Renderer Start.");
+            RenderWindow renderWindow = e.Argument as RenderWindow;
+
             Text fpsText = new Text("", font, 40);
             fpsText.LetterSpacing = 1.5f;
             fpsText.FillColor = Color.Magenta;
@@ -76,40 +147,14 @@ namespace SfmlProject {
             unitText.LetterSpacing = 1.5f;
             unitText.FillColor = Color.Blue;
 
-            // textures are stored in video memory (fast to draw); images are stored in system memory (fast to modify)
-            // use as FEW textures as possible; they are expensive; cut sprites from bigger textures instead
-            Image image = new Image("Resources/AmongUs.png");
-            image.FlipHorizontally();
-            Texture texture = new Texture(image);
-            texture.Smooth = true;
-            texture.Repeated = false;
-            //Texture texture = new Texture("Resources/AmongUs.png");
-            Sprite sprite = new Sprite(texture);
-            sprite.Color = Color.Yellow;
-            sprite.Scale = new Vector2f(0.5f, 0.5f);
-            sprite.Position = new Vector2f(400, 10);
-
-            // WOOD :D
-            Texture woodTexture = new Texture("Resources/wood.jpg");
-            woodTexture.Repeated = true;
-            woodTexture.Smooth = true;
-
             Clock fpsClock = new Clock();
             int fpsCount = 0;
             Clock frameClock = new Clock();
 
-            List<IRenderable> stuff = new List<IRenderable>();
-            stuff.Add(new Point(50, 300));
-            stuff.Add(new Line(new Point(10, 10), new Point(10, 100)));
-            stuff.Add(new Triangle(new Point(100, 100), new Point(200, 200), new Point(100, 180)));
-            stuff.Add(new Polygon(new Point(400, 400), new Point(300, 400), new Point(500, 500), new Point(400, 300)));
-            stuff.Add(new Circle(new Point(100, 300), 50));
-
             while (renderWindow.IsOpen && !Keyboard.IsKeyPressed(Keyboard.Key.Escape)) {
-                // important! trigger event processing; must be called in window thread
-                renderWindow.DispatchEvents();
+                //// important! trigger event processing; must be called in window thread
+                //renderWindow.DispatchEvents();
 
-                // rendering (if done in another thread, deactivate renderWindow in this thread and activate it in the new one first)
                 renderWindow.Clear();
                 // FPS
                 if (fpsClock.ElapsedTime.AsMilliseconds() >= 1000) {
@@ -120,14 +165,6 @@ namespace SfmlProject {
                 }
                 renderWindow.Draw(fpsText);
 
-                /**
-                 * SCENE
-                 */
-                // shapes
-                //foreach (IRenderable renderItem in stuff) {
-                //    renderWindow.Draw(renderItem.Renderable);
-                //}
-
                 long detectedUnits = 0;
                 // units
                 RectangleShape unitShape = new RectangleShape(new Vector2f(1f, 1f));
@@ -136,22 +173,6 @@ namespace SfmlProject {
                     unitShape.Position = new Vector2f(unit.Position.X, unit.Position.Y);
                     renderWindow.Draw(unitShape);
                 }
-
-                //foreach (IRenderable renderItem in stuff) {
-                //    renderWindow.Draw(renderItem.Renderable);
-                //}
-
-                // sprite + keyboard/mouse state (different than events; can directly access input hw state)
-                if (Mouse.IsButtonPressed(Mouse.Button.Right) || Keyboard.IsKeyPressed(Keyboard.Key.E)) {
-                    renderWindow.Draw(sprite);
-                }
-
-                //// textured shape
-                //CircleShape circle = new CircleShape(50.0f);
-                //circle.Position = new Vector2f(300, 300);
-                //circle.Texture = woodTexture;
-                //circle.TextureRect = new IntRect(0, 0, 100, 100);
-                //renderWindow.Draw(circle);
 
                 // timing info
                 frameText.DisplayedString = frameClock.Restart().AsMilliseconds() + "ms";
@@ -172,6 +193,10 @@ namespace SfmlProject {
                 renderWindow.Display();
                 fpsCount++;
             }
+        }
+
+        private static void RenderWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            LOGGER.Info("Renderer Shutdown.");
         }
 
         // testing stuff
